@@ -176,7 +176,7 @@
       const postsEl = document.getElementById('posts');
       const noPostsEl = document.getElementById('noPosts');
 
-      db.collection('posts').orderBy('createdAt','asc')
+      db.collection('posts').orderBy('createdAt','desc')
         .onSnapshot(snap=>{
           if(snap.empty){
             noPostsEl.style.display='block'; postsEl.innerHTML='';
@@ -184,19 +184,18 @@
             return;
           }
           noPostsEl.style.display='none'; postsEl.innerHTML='';
-          let i=1;
           snap.forEach(doc=>{
             const d=doc.data();
             const art=document.createElement('article');
             art.className="post-title-item";
             art.innerHTML=`
-              <span class="post-date">Bài ${i}</span>
+              <span class="post-date">👉 Bài viết nhấn vào để xem</span>
               <a href="post.html?slug=${d.slug}" target="_blank">${d.title||''}</a>
             `;
             postsEl.appendChild(art);
-            i++;
           });
         });
     </script>
+
 </body>
 </html>
