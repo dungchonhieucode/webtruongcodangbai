@@ -53,6 +53,8 @@
           <button type="button" onclick="format('justifyRight')">Phải</button>
           <button type="button" onclick="format('justifyFull')">Đều</button>
           <input type="color" id="colorPicker" title="Chọn màu chữ">
+          <button type="button" onclick="changeFontSize('increase')">A+</button>
+          <button type="button" onclick="changeFontSize('decrease')">A-</button>
           <button type="button" onclick="insertImageURL()">Ảnh URL</button>
           <input type="file" id="imageUpload" accept="image/*">
         </div>
@@ -122,6 +124,10 @@
     document.getElementById('colorPicker').addEventListener('input',e=>{
       document.execCommand('foreColor',false,e.target.value);
     });
+    function changeFontSize(action){
+      if(action==='increase') document.execCommand('fontSize',false,'5');
+      if(action==='decrease') document.execCommand('fontSize',false,'2');
+    }
     function insertImageURL(){
       const url=prompt("Nhập URL ảnh:");
       if(url) document.execCommand('insertImage',false,url);
