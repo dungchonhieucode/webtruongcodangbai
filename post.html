@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bài viết</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f9fafb;padding:20px}
+    .container{max-width:800px;margin:auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    h1{color:#0b7285}
+    img{max-width:100%;margin-top:15px;border-radius:8px}
+    .meta{color:#666;font-size:0.9rem;margin-bottom:12px}
+  </style>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1 id="title">Đang tải...</h1>
+    <div class="meta" id="author"></div>
+    <div id="content"></div>
+    <p style="margin-top:20px"><a href="index.html">← Quay lại trang chủ</a></p>
+  </div>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
+      authDomain: "baivietwebngoisaoxanh.firebaseapp.com",
+      projectId: "baivietwebngoisaoxanh",
+      appId: "1:38104930715:web:22c85f0b8462e96d47293e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db=firebase.firestore();
+
+    // Lấy slug hoặc id từ URL
+    const params=new URLSearchParams(window.location.search);
+    const slug=params.get('slug');
+    const id=params.get('id');
+
+    function render(d){
+      document.getElementById('title').textContent=d.title||'';
+      document.getElementById('content').innerHTML=d.content||'';
+      document.getElementById('author').textContent="Tác giả: "+(d.authorEmail||'');
+    }
+
+    if(slug){
+      db.collection('posts').where("slug","==",slug).limit(1).get().then(snap=>{
+        if(!snap.empty){
+          render(snap.docs[0].data());
+        }else if(id){
+          db.collection('posts').doc(id).get().then(doc=>{
+            if(doc.exists) render(doc.data());
+            else document.getElementById('title').textContent="Bài viết không tồn tại!";
+          });
+        }else{
+          document.getElementById('title').textContent="Bài viết không tồn tại!";
+        }
+      });
+    }else if(id){
+      db.collection('posts').doc(id).get().then(doc=>{
+        if(doc.exists) render(doc.data());
+        else document.getElementById('title').textContent="Bài viết không tồn tại!";
+      });
+    }else{
+      document.getElementById('title').textContent="Không có tham số bài viết!";
+    }
+  </script>
+</body>
+</html>

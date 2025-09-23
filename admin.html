@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Đăng bài</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f0f4f8;padding:20px}
+    .card{background:#fff;padding:20px;border-radius:10px;max-width:900px;margin:auto;box-shadow:0 6px 18px rgba(0,0,0,0.1)}
+    label{font-weight:bold;margin-top:10px;display:block}
+    input{padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px}
+    .editor{border:1px solid #ccc;border-radius:6px;min-height:250px;padding:10px;margin-top:6px;background:#fff}
+    .toolbar button,.toolbar input[type=color]{margin-right:5px;padding:5px 8px}
+    .btn{margin-top:12px;padding:10px 14px;border:0;border-radius:6px;cursor:pointer}
+    .btn-primary{background:#0b7285;color:#fff}
+    .btn-ghost{background:#eee}
+    .hidden{display:none}
+    .post-list{margin-top:30px}
+    .post-item{border-bottom:1px solid #ddd;padding:8px 0;display:flex;justify-content:space-between;align-items:center}
+    .post-item span{flex:1}
+    #imgTools{margin-top:10px;padding:10px;background:#f8f9fa;border:1px solid #ddd;border-radius:6px}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="card">
+    <h2>Đăng nhập / Đăng bài</h2>
+
+    <!-- Login -->
+    <div id="loginBox">
+      <label>Email</label><input id="email" type="email">
+      <label>Mật khẩu</label><input id="password" type="password">
+      <button id="btnLogin" class="btn btn-primary">Đăng nhập</button>
+      <button id="btnSignup" class="btn btn-ghost">Đăng ký</button>
+      <div id="loginMsg" style="color:red;font-size:0.9rem"></div>
+    </div>
+
+    <!-- Post -->
+    <div id="postBox" class="hidden">
+      <h3>Tạo bài mới</h3>
+      <form id="postForm">
+        <label>Tiêu đề</label><input id="postTitle" style="width:100%" required>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <button type="button" onclick="format('bold')"><b>B</b></button>
+          <button type="button" onclick="format('italic')"><i>I</i></button>
+          <button type="button" onclick="format('underline')"><u>U</u></button>
+          <button type="button" onclick="format('justifyLeft')">Trái</button>
+          <button type="button" onclick="format('justifyCenter')">Giữa</button>
+          <button type="button" onclick="format('justifyRight')">Phải</button>
+          <button type="button" onclick="format('justifyFull')">Đều</button>
+          <input type="color" id="colorPicker" title="Chọn màu chữ">
+          <button type="button" onclick="insertImageURL()">Ảnh URL</button>
+          <input type="file" id="imageUpload" accept="image/*">
+        </div>
+
+        <!-- Editor -->
+        <div id="editor" class="editor" contenteditable="true"></div>
+
+        <!-- Resize selected image -->
+        <div id="imgTools" class="hidden">
+          <label>Chiều rộng (%)</label>
+          <input type="number" id="imgWidth" min="10" max="100" step="5" value="100">
+          <button type="button" onclick="applyImgSize()">Áp dụng</button>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Đăng bài</button>
+        <button type="button" id="btnLogout" class="btn btn-ghost">Đăng xuất</button>
+      </form>
+      <div id="status" style="margin-top:8px;font-size:0.9rem;color:green"></div>
+
+      <!-- Danh sách bài -->
+      <div class="post-list">
+        <h3>Bài đã đăng</h3>
+        <div id="myPosts"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
+      authDomain: "baivietwebngoisaoxanh.firebaseapp.com",
+      projectId: "baivietwebngoisaoxanh",
+      appId: "1:38104930715:web:22c85f0b8462e96d47293e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth=firebase.auth(), db=firebase.firestore();
+
+    const loginBox=document.getElementById('loginBox');
+    const postBox=document.getElementById('postBox');
+    const msg=document.getElementById('loginMsg');
+    const statusEl=document.getElementById('status');
+    const editor=document.getElementById('editor');
+    const imgTools=document.getElementById('imgTools');
+    let selectedImg=null;
+
+    // Auth
+    document.getElementById('btnLogin').onclick=()=>auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>msg.textContent=e.message);
+    document.getElementById('btnSignup').onclick=()=>auth.createUserWithEmailAndPassword(email.value,password.value)
+      .then(u=>u.user.sendEmailVerification())
+      .then(()=>msg.textContent="Đã tạo tài khoản, vui lòng xác thực email.")
+      .catch(e=>msg.textContent=e.message);
+    document.getElementById('btnLogout').onclick=()=>auth.signOut();
+
+    auth.onAuthStateChanged(u=>{
+      if(u){
+        loginBox.classList.add('hidden');
+        postBox.classList.remove('hidden');
+        loadMyPosts();
+      }else{
+        loginBox.classList.remove('hidden');
+        postBox.classList.add('hidden');
+      }
+    });
+
+    // Toolbar
+    function format(cmd){ document.execCommand(cmd,false,null); }
+    document.getElementById('colorPicker').addEventListener('input',e=>{
+      document.execCommand('foreColor',false,e.target.value);
+    });
+    function insertImageURL(){
+      const url=prompt("Nhập URL ảnh:");
+      if(url) document.execCommand('insertImage',false,url);
+    }
+    document.getElementById('imageUpload').addEventListener('change',async e=>{
+      const file=e.target.files[0];
+      if(file){
+        const reader=new FileReader();
+        reader.onload=()=>{ document.execCommand('insertImage',false,reader.result); };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Resize ảnh khi click
+    editor.addEventListener('click',e=>{
+      if(e.target.tagName==="IMG"){
+        selectedImg=e.target;
+        document.getElementById('imgWidth').value=selectedImg.style.width.replace('%','')||100;
+        imgTools.classList.remove('hidden');
+      }else{
+        selectedImg=null;
+        imgTools.classList.add('hidden');
+      }
+    });
+    function applyImgSize(){
+      if(selectedImg){
+        const w=document.getElementById('imgWidth').value;
+        selectedImg.style.width=w+"%";
+      }
+    }
+
+    // Slugify
+    function slugify(str){
+      return str.toString().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-z0-9]+/g,"-")
+        .replace(/(^-|-$)+/g,"");
+    }
+
+    // Submit
+    document.getElementById('postForm').onsubmit=async e=>{
+      e.preventDefault();
+      const titleEl=document.getElementById('postTitle');
+      const htmlContent=editor.innerHTML;
+      const slug=slugify(titleEl.value);
+
+      await db.collection('posts').add({
+        title:titleEl.value,
+        content:htmlContent,
+        slug:slug,
+        createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+        authorUid:auth.currentUser.uid,
+        authorEmail:auth.currentUser.email
+      });
+
+      statusEl.textContent="✅ Đăng thành công!";
+      titleEl.value="";
+      editor.innerHTML="";
+      loadMyPosts();
+    };
+
+    // Load & xóa bài
+    function loadMyPosts(){
+      db.collection('posts').orderBy("createdAt","desc").onSnapshot(snap=>{
+        const list=document.getElementById('myPosts');
+        list.innerHTML="";
+        snap.forEach(doc=>{
+          const d=doc.data();
+          const div=document.createElement('div');
+          div.className="post-item";
+          let buttons="";
+          if(auth.currentUser && d.authorUid===auth.currentUser.uid){
+            buttons=`<button onclick="deletePost('${doc.id}')">Xóa</button>`;
+          }
+          div.innerHTML=`<span>${d.title}</span>${buttons}`;
+          list.appendChild(div);
+        });
+      });
+    }
+    async function deletePost(id){
+      if(confirm("Bạn có chắc muốn xóa bài này?")){
+        await db.collection('posts').doc(id).delete();
+        alert("Đã xóa!");
+      }
+    }
+  </script>
+</body>
+</html>
