@@ -123,24 +123,10 @@
             </div>
             <div class="post-titles">
                 <h2>Kinh nghiệm chăm sóc trẻ lứa tuổi mầm non</h2>
-                <div class="post-title-container">
-                    <article class="post-title-item">
-                        <span class="post-date">Bài 1</span>
-                        <a href="#">Tạo môi trường an toàn và khuyến khích khám phá</a>
-                    </article>
-                    <article class="post-title-item">
-                        <span class="post-date">Bài 2</span>
-                        <a href="#">Thiết lập lịch trình nhất quán</a>
-                    </article>
-                    <article class="post-title-item">
-                        <span class="post-date">Bài 3</span>
-                        <a href="#">Đọc sách cho trẻ nghe hàng ngày giúp phát triển ngôn ngữ và tư duy</a>
-                    </article>
-                    <article class="post-title-item">
-                        <span class="post-date">Bài 4</span>
-                        <a href="#">Dạy trẻ cách biểu đạt cảm xúc và lắng nghe người khác.</a>
-                    </article>
-                </div>
+                <!-- PHẦN CODE TẢI BÀI VIẾT TỰ ĐỘNG ĐƯỢC THAY THẾ Ở ĐÂY -->
+                <div id="posts" class="post-title-container"></div>
+                <div id="noPosts" style="text-align:center;color:#666">Đang tải...</div>
+                <!-- KẾT THÚC PHẦN THAY THẾ -->
             </div>
             <div class="posts">
                 <article class="post">
@@ -171,5 +157,46 @@
     <script src="script.js"></script>
     <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91e777bd98a153af',t:'MTc0MTY1ODUyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
     <script src="analytics-dashboard.js"></script>
+
+    <!-- Firebase SDK (ĐÃ THÊM VÀO) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <!-- Code tải bài viết từ Firebase (ĐÃ THÊM VÀO) -->
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
+        authDomain: "baivietwebngoisaoxanh.firebaseapp.com",
+        projectId: "baivietwebngoisaoxanh",
+        appId: "1:38104930715:web:22c85f0b8462e96d47293e"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const postsEl = document.getElementById('posts');
+      const noPostsEl = document.getElementById('noPosts');
+
+      db.collection('posts').orderBy('createdAt','asc')
+        .onSnapshot(snap=>{
+          if(snap.empty){
+            noPostsEl.style.display='block'; postsEl.innerHTML='';
+            noPostsEl.textContent="Chưa có bài nào.";
+            return;
+          }
+          noPostsEl.style.display='none'; postsEl.innerHTML='';
+          let i=1;
+          snap.forEach(doc=>{
+            const d=doc.data();
+            const art=document.createElement('article');
+            art.className="post-title-item";
+            art.innerHTML=`
+              <span class="post-date">Bài ${i}</span>
+              <a href="post.html?slug=${d.slug}" target="_blank">${d.title||''}</a>
+            `;
+            postsEl.appendChild(art);
+            i++;
+          });
+        });
+    </script>
 </body>
 </html>
