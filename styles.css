@@ -421,7 +421,7 @@ main {
     font-size: 0.9rem;
 }
 
-//* Event Section */
+/* Event Section */
 .event-section {
     display: flex;
     gap: 1rem;
@@ -443,19 +443,11 @@ main {
     box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
 }
 
-.event-item.welcome {
-    /* Đảm bảo không có CSS riêng làm thay đổi kích thước */
-}
-
 .event-item.welcome h2 {
     font-size: 1.2rem;
     margin: 0;
     padding: 0;
     line-height: 1.5;
-}
-
-.event-item.menu {
-    /* Đảm bảo không có CSS riêng làm thay đổi kích thước */
 }
 
 .menu-link {
@@ -563,7 +555,7 @@ footer {
     .header-container {
         flex-direction: column;
         gap: 0.5rem;
-        min-height: 180px; /* Tăng chiều cao tối thiểu cho màn hình nhỏ hơn */
+        min-height: 180px;
         padding: 1.5rem;
     }
 
@@ -649,6 +641,15 @@ footer {
     .event-section {
         flex-direction: column;
     }
+
+    /* --- BẮT ĐẦU SỬA LỖI HIỂN THỊ "THỰC ĐƠN" --- */
+    .event-item {
+        height: auto; /* Cho phép chiều cao tự động điều chỉnh */
+        min-height: 80px; /* Đặt chiều cao tối thiểu để trông đẹp mắt */
+        flex: 1 1 auto; /* Thay đổi thuộc tính flex */
+    }
+    /* --- KẾT THÚC SỬA LỖI --- */
+
 }
 
 @media (max-width: 480px) {
@@ -685,7 +686,7 @@ footer {
     }
 
     .header-container {
-        min-height: 200px; /* Tăng thêm chiều cao tối thiểu cho màn hình rất nhỏ */
+        min-height: 200px;
         padding: 1rem;
     }
 }
