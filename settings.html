@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Cài đặt nội dung</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f0f4f8;padding:20px}
+    .card{background:#fff;padding:20px;border-radius:10px;max-width:900px;margin:auto;box-shadow:0 6px 18px rgba(0,0,0,0.1)}
+    label{font-weight:bold;margin-top:15px;display:block}
+    input, textarea{width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;}
+    textarea{min-height:120px;font-family:inherit;font-size:inherit; line-height: 1.5;}
+    .btn{margin-top:12px;padding:10px 14px;border:0;border-radius:6px;cursor:pointer}
+    .btn-primary{background:#0b7285;color:#fff}
+    .btn-ghost{background:#eee}
+    .hidden{display:none}
+    #status{margin-top:10px;font-size:0.9rem;font-weight:bold;}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="card">
+    <h2>Cài đặt nội dung trang chủ</h2>
+    <p>Chỉnh sửa nội dung các thông báo và thực đơn tại đây. Sau khi lưu, trang chủ sẽ tự động cập nhật.</p>
+    <p>
+      <a href="admin.html">Quản lý bài viết</a> | 
+      <a href="index.html" target="_blank">Xem trang chủ</a>
+    </p>
+
+    <!-- Login -->
+    <div id="loginBox">
+      <label>Email</label><input id="email" type="email">
+      <label>Mật khẩu</label><input id="password" type="password">
+      <button id="btnLogin" class="btn btn-primary">Đăng nhập</button>
+      <div id="loginMsg" style="color:red;font-size:0.9rem"></div>
+    </div>
+
+    <!-- Settings Form -->
+    <div id="settingsBox" class="hidden">
+      <form id="settingsForm">
+        <label for="thongBaoBe">Thông Báo Cho Bé (mỗi thông báo một dòng)</label>
+        <textarea id="thongBaoBe" required placeholder="Ngày hội Bé Vui Chơi: 05/03/2025&#10;Giờ kể chuyện: 10/03/2025"></textarea>
+
+        <label for="thongBaoPhuHuynh">Thông Báo Cho Phụ Huynh (mỗi thông báo một dòng)</label>
+        <textarea id="thongBaoPhuHuynh" required placeholder="Họp phụ huynh: 08/03/2025&#10;Đăng ký hè 2025: 20/03/2025"></textarea>
+
+        <label for="thongBaoChung">Thông Báo Chung</label>
+        <textarea id="thongBaoChung" required rows="3"></textarea>
+        
+        <label for="thucDonText">Văn bản hiển thị của Thực đơn</label>
+        <input id="thucDonText" type="text" required>
+        
+        <label for="thucDonLink">Đường dẫn của Thực đơn (ví dụ: menu.html)</label>
+        <input id="thucDonLink" type="text" required>
+
+        <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+        <button type="button" id="btnLogout" class="btn btn-ghost">Đăng xuất</button>
+      </form>
+      <div id="status"></div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
+      authDomain: "baivietwebngoisaoxanh.firebaseapp.com",
+      projectId: "baivietwebngoisaoxanh",
+      appId: "1:38104930715:web:22c85f0b8462e96d47293e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const contentDocRef = db.collection('site_content').doc('dynamic_content');
+
+    const loginBox = document.getElementById('loginBox');
+    const settingsBox = document.getElementById('settingsBox');
+    const msg = document.getElementById('loginMsg');
+    const statusEl = document.getElementById('status');
+
+    // Auth
+    document.getElementById('btnLogin').onclick = () => auth.signInWithEmailAndPassword(email.value, password.value).catch(e => msg.textContent = e.message);
+    document.getElementById('btnLogout').onclick = () => auth.signOut();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginBox.classList.add('hidden');
+        settingsBox.classList.remove('hidden');
+        loadSettings();
+      } else {
+        loginBox.classList.remove('hidden');
+        settingsBox.classList.add('hidden');
+      }
+    });
+
+    /**
+     * Chuyển đổi chuỗi HTML <li> thành văn bản thuần túy (mỗi <li> một dòng)
+     * @param {string} html - Chuỗi HTML đầu vào. Ví dụ: "<li>Dòng 1</li><li>Dòng 2</li>"
+     * @returns {string} - Văn bản thuần túy. Ví dụ: "Dòng 1\nDòng 2"
+     */
+    function liToPlainText(html) {
+        if (!html) return '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = `<ul>${html}</ul>`;
+        const items = tempDiv.querySelectorAll('li');
+        return Array.from(items).map(li => li.textContent).join('\n');
+    }
+
+    /**
+     * Chuyển đổi văn bản thuần túy (mỗi dòng một mục) thành chuỗi HTML <li>
+     * @param {string} text - Văn bản thuần túy. Ví dụ: "Dòng 1\nDòng 2"
+     * @returns {string} - Chuỗi HTML. Ví dụ: "<li>Dòng 1</li><li>Dòng 2</li>"
+     */
+    function plainTextToLi(text) {
+        if (!text) return '';
+        return text.split('\n')
+                   .map(line => line.trim())
+                   .filter(line => line) // Bỏ qua các dòng trống
+                   .map(line => `<li>${line}</li>`)
+                   .join('');
+    }
+
+    // Tải cài đặt hiện tại vào form
+    async function loadSettings() {
+      try {
+        const doc = await contentDocRef.get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('thongBaoBe').value = liToPlainText(data.thongBaoBe);
+          document.getElementById('thongBaoPhuHuynh').value = liToPlainText(data.thongBaoPhuHuynh);
+          document.getElementById('thongBaoChung').value = data.thongBaoChung || '';
+          document.getElementById('thucDonText').value = data.thucDonText || '';
+          document.getElementById('thucDonLink').value = data.thucDonLink || '';
+        } else {
+          statusEl.style.color = 'orange';
+          statusEl.textContent = 'Chưa có dữ liệu. Vui lòng điền và lưu lần đầu.';
+        }
+      } catch (error) {
+        statusEl.style.color = 'red';
+        statusEl.textContent = 'Lỗi tải dữ liệu: ' + error.message;
+      }
+    }
+
+    // Lưu cài đặt
+    document.getElementById('settingsForm').onsubmit = async e => {
+      e.preventDefault();
+      statusEl.textContent = 'Đang lưu...';
+      statusEl.style.color = 'blue';
+
+      const dataToSave = {
+        thongBaoBe: plainTextToLi(document.getElementById('thongBaoBe').value),
+        thongBaoPhuHuynh: plainTextToLi(document.getElementById('thongBaoPhuHuynh').value),
+        thongBaoChung: document.getElementById('thongBaoChung').value,
+        thucDonText: document.getElementById('thucDonText').value,
+        thucDonLink: document.getElementById('thucDonLink').value,
+      };
+
+      try {
+        await contentDocRef.set(dataToSave, { merge: true });
+        statusEl.style.color = 'green';
+        statusEl.textContent = '✅ Đã lưu thành công!';
+      } catch (error) {
+        statusEl.style.color = 'red';
+        statusEl.textContent = 'Lỗi khi lưu: ' + error.message;
+      }
+
+      setTimeout(() => statusEl.textContent = '', 4000);
+    };
+  </script>
+</body>
+</html>

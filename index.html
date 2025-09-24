@@ -40,16 +40,6 @@
     </style>
 </head>
 <body>
-    <!-- Nút Hamburger cho Menu Mobile -->
-    <button id="menu-toggle" class="menu-toggle">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-    
-    <!-- Lớp phủ (overlay) khi menu mobile mở -->
-    <div id="overlay" class="overlay"></div>
-
     <header>
         <div class="header-container">
             <img src="logo.png" alt="Logo Trường Mầm Non Ngôi Sao Xanh" class="logo">
@@ -59,7 +49,7 @@
                 <p>122 Huỳnh Ngọc Huệ, Q. Thanh Khê, Đà Nẵng<br>Điện thoại: 0236727466 | Email: ngoisaoxanh114@gmail.com </span></a><br><a href="https://www.facebook.com/103755418223477?ref=embed_page" target="_blank">Facebook: Trường Mầm Non Ngôi Sao Xanh</a></p>
             </div>
         </div>
-        <nav class="menu" id="main-menu">
+        <nav class="menu">
             <a href="#" class="menu-item">Trang chủ</a>
             <a href="lophoc.html" class="menu-item">Lớp Học Của Bé</a>
             <a href="phuhuynhgopy.html" class="menu-item">Góc Phụ Huynh</a>
@@ -73,23 +63,15 @@
         <aside class="sidebar">
             <div class="notification">
                 <h3>Thông Báo Cho Bé</h3>
-                <ul>
-                    <li>Ngày hội Bé Vui Chơi: 05/03/2025</li>
-                    <li>Giờ kể chuyện: 10/03/2025</li>
-                    <li>Bé học làm bánh: 15/03/2025</li>
-                </ul>
+                <ul id="thongBaoBeContent"><li>Đang tải...</li></ul>
             </div>
             <div class="notification">
                 <h3>Thông Báo Cho Phụ Huynh</h3>
-                <ul>
-                    <li>Họp phụ huynh: 08/03/2025</li>
-                    <li>Đăng ký hè 2025: 20/03/2025</li>
-                    <li>Hội thảo dinh dưỡng: 25/03/2025</li>
-                </ul>
+                <ul id="thongBaoPhuHuynhContent"><li>Đang tải...</li></ul>
             </div>
             <div class="notification">
                 <h3>Thông Báo Chung</h3>
-                <p>Đăng ký cấp thẻ Căn cước công dân cho các bé song ngữ tại trường.</p>
+                <p id="thongBaoChungContent">Đang tải...</p>
             </div>
             <div class="notification">
                 <h3>Địa Chỉ Trường</h3>
@@ -133,10 +115,8 @@
             </div>
             <div class="post-titles">
                 <h2>Kinh nghiệm chăm sóc trẻ lứa tuổi mầm non</h2>
-                <!-- PHẦN CODE TẢI BÀI VIẾT TỰ ĐỘNG ĐƯỢC THAY THẾ Ở ĐÂY -->
                 <div id="posts" class="post-title-container"></div>
                 <div id="noPosts" style="text-align:center;color:#666">Đang tải...</div>
-                <!-- KẾT THÚC PHẦN THAY THẾ -->
             </div>
             <div class="posts">
                 <article class="post">
@@ -153,7 +133,7 @@
                     <h2>Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình</h2>
                 </div>
                 <div class="event-item menu">
-                    <a href="menu.html" class="menu-link">Thực đơn tuần 3 tháng 02-2025</a>
+                    <a href="menu.html" class="menu-link" id="thucDonLink">Đang tải...</a>
                 </div>
             </div>
         </section>
@@ -163,16 +143,12 @@
         <p>Bản quyền trang website thuộc về Trường Mầm non Ngôi Sao Xanh, 122 Huỳnh Ngọc Huệ, Đà Nẵng.</p>
     </footer>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script src="script.js"></script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91e777bd98a153af',t:'MTc0MTY1ODUyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-    <script src="analytics-dashboard.js"></script>
-
-    <!-- Firebase SDK (ĐÃ THÊM VÀO) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-    <!-- Code tải bài viết từ Firebase (ĐÃ THÊM VÀO) -->
+    <!-- Script tải bài viết và nội dung động -->
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
@@ -183,9 +159,9 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
 
+      // --- Tải bài viết (giữ nguyên) ---
       const postsEl = document.getElementById('posts');
       const noPostsEl = document.getElementById('noPosts');
-
       db.collection('posts').orderBy('createdAt','desc')
         .onSnapshot(snap=>{
           if(snap.empty){
@@ -204,6 +180,26 @@
             `;
             postsEl.appendChild(art);
           });
+        });
+
+      // --- Tải nội dung động cho sidebar và thực đơn ---
+      const thongBaoBeEl = document.getElementById('thongBaoBeContent');
+      const thongBaoPhuHuynhEl = document.getElementById('thongBaoPhuHuynhContent');
+      const thongBaoChungEl = document.getElementById('thongBaoChungContent');
+      const thucDonLinkEl = document.getElementById('thucDonLink');
+
+      db.collection('site_content').doc('dynamic_content')
+        .onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            thongBaoBeEl.innerHTML = data.thongBaoBe || 'Chưa có thông báo.';
+            thongBaoPhuHuynhEl.innerHTML = data.thongBaoPhuHuynh || 'Chưa có thông báo.';
+            thongBaoChungEl.textContent = data.thongBaoChung || 'Chưa có thông báo.';
+            thucDonLinkEl.textContent = data.thucDonText || 'Xem thực đơn';
+            thucDonLinkEl.href = data.thucDonLink || '#';
+          } else {
+            console.log("Không tìm thấy tài liệu cấu hình!");
+          }
         });
     </script>
 
