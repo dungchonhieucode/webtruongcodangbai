@@ -1,4 +1,3 @@
-
 /* Reset và style cơ bản */
 /* Font Anton */
 @font-face {
@@ -504,6 +503,49 @@ footer {
     animation: fadeInSlide 1.6s ease-out;
 }
 
+/* --- BẮT ĐẦU PHẦN CODE CHO MENU MOBILE --- */
+
+/* Nút Hamburger */
+.menu-toggle {
+    display: none; /* Mặc định ẩn trên màn hình lớn */
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    width: 45px;
+    height: 45px;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: #333;
+    margin: 5px auto;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Lớp phủ (overlay) */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+/* --- KẾT THÚC PHẦN CODE CHO MENU MOBILE --- */
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
     main {
@@ -521,16 +563,75 @@ footer {
     .header-container {
         flex-direction: column;
         gap: 0.5rem;
+        min-height: 180px; /* Tăng chiều cao tối thiểu cho màn hình nhỏ hơn */
+        padding: 1.5rem;
     }
 
+    /* --- CSS CHO MENU KHI Ở CHẾ ĐỘ MOBILE --- */
+    .menu-toggle {
+        display: block; /* Hiện nút hamburger */
+    }
+
+    .overlay.is-open {
+        display: block; /* Hiện lớp phủ khi menu mở */
+    }
+    
     .menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px; /* Chiều rộng của menu trượt ra */
+        height: 100%;
+        background-color: #fff;
+        z-index: 999;
         flex-direction: column;
-        align-items: center;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 60px 0 20px 0;
+        margin-top: 0;
+        border-radius: 0;
+        transform: translateX(-100%); /* Ẩn menu sang bên trái */
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .menu.is-open {
+        transform: translateX(0); /* Hiện menu khi có class 'is-open' */
+        box-shadow: 5px 0 15px rgba(0,0,0,0.2);
     }
 
     .menu-item {
-        width: 80%;
+        width: 100%;
+        border-radius: 0;
+        color: #333;
+        font-size: 1rem;
+        padding: 15px 25px;
+        border-bottom: 1px solid #f0f0f0;
     }
+
+    .menu-item:hover {
+        transform: none;
+        color: white; /* Giữ màu chữ trắng khi hover */
+        box-shadow: none;
+    }
+
+    /* Ghi đè lại màu nền của các menu item */
+    .menu-item:nth-child(1),
+    .menu-item:nth-child(2),
+    .menu-item:nth-child(3),
+    .menu-item:nth-child(4),
+    .menu-item:nth-child(5),
+    .menu-item:nth-child(6) {
+        background-color: transparent !important;
+    }
+    
+    .menu-item:nth-child(1):hover { background-color: #e5533d !important; }
+    .menu-item:nth-child(2):hover { background-color: #3d75a3 !important; }
+    .menu-item:nth-child(3):hover { background-color: #2cb32c !important; }
+    .menu-item:nth-child(4):hover { background-color: #e63e00 !important; }
+    .menu-item:nth-child(5):hover { background-color: #8562c9 !important; }
+    .menu-item:nth-child(6):hover { background-color: #e69500 !important; }
+    /* --- KẾT THÚC CSS CHO MENU MOBILE --- */
+
 
     .image-slider {
         aspect-ratio: 16 / 9;
@@ -562,12 +663,7 @@ footer {
     .header-text p {
         font-size: 0.8rem;
     }
-
-    .menu-item {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-    }
-
+    
     .post-titles h2 {
         font-size: 1.2rem;
     }
@@ -587,15 +683,7 @@ footer {
     .menu-link {
         font-size: 0.9rem;
     }
-}
-    @media (max-width: 768px) {
-    .header-container {
-        min-height: 180px; /* Tăng chiều cao tối thiểu cho màn hình nhỏ hơn */
-        padding: 1.5rem;
-    }
-}
 
-    @media (max-width: 480px) {
     .header-container {
         min-height: 200px; /* Tăng thêm chiều cao tối thiểu cho màn hình rất nhỏ */
         padding: 1rem;
