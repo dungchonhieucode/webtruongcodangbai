@@ -40,16 +40,24 @@
     </style>
 </head>
 <body>
+    <!-- Nút hamburger và overlay cho mobile -->
+    <button class="menu-toggle" id="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="overlay" id="overlay"></div>
+
     <header>
         <div class="header-container">
             <img src="logo.png" alt="Logo Trường Mầm Non Ngôi Sao Xanh" class="logo">
             <div class="header-text">
                 <h1>ỦY BAN NHÂN DÂN QUẬN THANH KHÊ</h1>
                 <h2>Trường Mầm Non Ngôi Sao Xanh</h2>
-                <p>122 Huỳnh Ngọc Huệ, Q. Thanh Khê, Đà Nẵng<br>Điện thoại: 0236727466 | Email: ngoisaoxanh114@gmail.com </span></a><br><a href="https://www.facebook.com/103755418223477?ref=embed_page" target="_blank">Facebook: Trường Mầm Non Ngôi Sao Xanh</a></p>
+                <p>122 Huỳnh Ngọc Huệ, Q. Thanh Khê, Đà Nẵng<br>Điện thoại: 0236727466 | Email: ngoisaoxanh114@gmail.com<br><a href="https://www.facebook.com/103755418223477?ref=embed_page" target="_blank">Facebook: Trường Mầm Non Ngôi Sao Xanh</a></p>
             </div>
         </div>
-        <nav class="menu">
+        <nav class="menu" id="main-menu">
             <a href="#" class="menu-item">Trang chủ</a>
             <a href="lophoc.html" class="menu-item">Lớp Học Của Bé</a>
             <a href="phuhuynhgopy.html" class="menu-item">Góc Phụ Huynh</a>
@@ -114,7 +122,7 @@
                 </div>
             </div>
             <div class="post-titles">
-                <h2>Kinh nghiệm chăm sóc trẻ lứa tuổi mầm non</h2>
+                <h2>Các bài viết của trường</h2>
                 <div id="posts" class="post-title-container"></div>
                 <div id="noPosts" style="text-align:center;color:#666">Đang tải...</div>
             </div>
@@ -132,9 +140,9 @@
                 <div class="event-item welcome">
                     <h2>Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình</h2>
                 </div>
-                <div class="event-item menu">
-                    <a href="menu.html" class="menu-link" id="thucDonLink">Đang tải...</a>
-                </div>
+            <div class="event-item event-menu">
+                <a href="menu.html" class="menu-link" id="thucDonLink">Đang tải...</a>
+            </div>
             </div>
         </section>
     </main>

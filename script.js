@@ -9,16 +9,29 @@ document.addEventListener('DOMContentLoaded', () => {
         menuToggle.addEventListener('click', () => {
             mainMenu.classList.toggle('is-open');
             overlay.classList.toggle('is-open');
+            menuToggle.classList.toggle('active');
         });
 
         // Sự kiện khi bấm vào lớp phủ (để đóng menu)
         overlay.addEventListener('click', () => {
             mainMenu.classList.remove('is-open');
             overlay.classList.remove('is-open');
+            menuToggle.classList.remove('active');
+        });
+
+        // Đóng menu khi bấm vào menu item (trên mobile)
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    mainMenu.classList.remove('is-open');
+                    overlay.classList.remove('is-open');
+                    menuToggle.classList.remove('active');
+                }
+            });
         });
     }
 });
-
 
 // --- PHẦN CODE CŨ VẪN GIỮ NGUYÊN ---
 
@@ -93,7 +106,7 @@ showImage(currentImageIndex);
 
 // Tự động chuyển ảnh mỗi 5 giây
 setInterval(() => changeImage(1), 5000);
-// Thêm vào cuối file script.js
+
 // Hàm cập nhật thống kê truy cập
 function updateStatistics() {
     // Mặc định hiển thị dữ liệu tĩnh khi chưa có dữ liệu từ Analytics
@@ -135,11 +148,49 @@ function updateStatistics() {
     }
     
     // Cập nhật UI
-    document.querySelector('.statistics p:nth-child(2)').textContent = `Lượt truy cập hôm nay: ${todayVisits}`;
-    document.querySelector('.statistics p:nth-child(3)').textContent = `Tổng số lượt truy cập: ${totalVisits.toLocaleString('vi-VN')}`;
-    document.querySelector('.statistics p:nth-child(4)').textContent = `Người đang online: ${onlineUsers}`;
-    document.querySelector('.statistics p:nth-child(5)').textContent = `Lượt truy cập tuần này: ${weeklyVisits}`;
+    const statsElements = document.querySelectorAll('.statistics p');
+    if (statsElements.length >= 4) {
+        statsElements[0].textContent = `Lượt truy cập hôm nay: ${todayVisits}`;
+        statsElements[1].textContent = `Tổng số lượt truy cập: ${totalVisits.toLocaleString('vi-VN')}`;
+        statsElements[2].textContent = `Người đang online: ${onlineUsers}`;
+        statsElements[3].textContent = `Lượt truy cập tuần này: ${weeklyVisits}`;
+    }
 }
+
+// Xử lý resize window để đảm bảo menu hoạt động đúng
+window.addEventListener('resize', () => {
+    const mainMenu = document.getElementById('main-menu');
+    const overlay = document.getElementById('overlay');
+    const menuToggle = document.getElementById('menu-toggle');
+    
+    if (window.innerWidth > 768) {
+        // Trở về desktop, đóng menu mobile nếu đang mở
+        if (mainMenu) mainMenu.classList.remove('is-open');
+        if (overlay) overlay.classList.remove('is-open');
+        if (menuToggle) menuToggle.classList.remove('active');
+    }
+});
+
+// Ngăn cuộn trang khi menu mobile đang mở
+document.addEventListener('DOMContentLoaded', () => {
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const overlay = document.getElementById('overlay');
+                if (overlay && overlay.classList.contains('is-open')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+    });
+
+    const overlay = document.getElementById('overlay');
+    if (overlay) {
+        observer.observe(overlay, { attributes: true });
+    }
+});
 
 // Gọi hàm cập nhật khi trang được tải
 document.addEventListener('DOMContentLoaded', updateStatistics);
