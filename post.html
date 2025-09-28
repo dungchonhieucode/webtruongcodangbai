@@ -10,7 +10,7 @@
         background: #f0f8ff;
         color: #33475b;
         padding: 20px 15px;
-        line-height: 1.7; /* Tăng chiều cao dòng để dễ đọc */
+        line-height: 1.7;
     }
     .container {
         max-width: 800px;
@@ -37,29 +37,40 @@
         flex-wrap: wrap;
     }
     #content {
-        font-size: 1.1rem; /* Tăng kích thước chữ nội dung */
+        font-size: 1.1rem;
+        /* --- CSS MỚI ĐỂ SỬA LỖI TRÀN VIỀN --- */
+        overflow-wrap: break-word;
+        word-wrap: break-word; /* Tương thích ngược */
+        word-break: break-word;
     }
-    /* Canh lề và định dạng cho các thành phần trong bài viết */
-    #content p {
-        margin-bottom: 1.2em;
-    }
+    #content p { margin-bottom: 1.2em; }
     #content img {
         max-width: 100%;
-        height: auto; /* Giữ đúng tỷ lệ ảnh */
+        height: auto;
         display: block;
-        margin: 25px auto; /* Căn giữa và tạo khoảng cách */
+        margin: 25px auto;
         border-radius: 8px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    #content h2, #content h3 {
-        color: #0277bd;
-        margin-top: 2em;
-        margin-bottom: 0.8em;
+    #content h2, #content h3 { color: #0277bd; margin-top: 2em; margin-bottom: 0.8em; }
+    #content ul, #content ol { padding-left: 25px; margin-bottom: 1.2em; }
+    
+    /* --- CSS MỚI ĐỂ XỬ LÝ CÁC BẢNG (TABLE) BỊ TRÀN --- */
+    #content table {
+        width: 100% !important; /* Buộc bảng phải vừa với container */
+        max-width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; /* Giúp các cột co giãn đều hơn */
     }
-    #content ul, #content ol {
-        padding-left: 25px;
-        margin-bottom: 1.2em;
+    #content th, #content td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        /* Đảm bảo chữ trong ô cũng tự xuống dòng */
+        overflow-wrap: break-word;
+        word-break: break-word;
     }
+    /* --- KẾT THÚC CSS MỚI --- */
+
     .back-link {
         display: inline-block;
         margin-top: 30px;
@@ -100,7 +111,6 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('slug');
 
