@@ -3,81 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin — Đăng bài</title>
+  <title>Admin — Quản lý bài viết</title>
   <style>
-    body{font-family:Arial,sans-serif;background:#f0f4f8;padding:20px}
-    .card{background:#fff;padding:20px;border-radius:10px;max-width:900px;margin:auto;box-shadow:0 6px 18px rgba(0,0,0,0.1)}
-    label{font-weight:bold;margin-top:10px;display:block}
-    input{padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px}
-    .editor{border:1px solid #ccc;border-radius:6px;min-height:250px;padding:10px;margin-top:6px;background:#fff}
-    .toolbar button,.toolbar input[type=color]{margin-right:5px;padding:5px 8px}
-    .btn{margin-top:12px;padding:10px 14px;border:0;border-radius:6px;cursor:pointer}
-    .btn-primary{background:#0b7285;color:#fff}
-    .btn-ghost{background:#eee}
-    .hidden{display:none}
-    .post-list{margin-top:30px}
-    .post-item{border-bottom:1px solid #ddd;padding:8px 0;display:flex;justify-content:space-between;align-items:center}
-    .post-item span{flex:1}
-    #imgTools{margin-top:10px;padding:10px;background:#f8f9fa;border:1px solid #ddd;border-radius:6px}
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #e3f2fd; padding: 20px; color: #33475b; }
+    .card { background: #fff; padding: 30px; border-radius: 12px; max-width: 900px; margin: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    h2, h3 { color: #01579b; border-bottom: 2px solid #e3f2fd; padding-bottom: 10px; margin-bottom: 20px; }
+    label { font-weight: bold; margin-top: 15px; display: block; margin-bottom: 5px; }
+    input[type="text"], input[type="email"], input[type="password"], .editor {
+        width: 100%; box-sizing: border-box; padding: 12px; margin-top: 4px;
+        border: 1px solid #b0bec5; border-radius: 8px; transition: all 0.3s;
+        font-size: 1rem;
+    }
+    input:focus, .editor:focus { border-color: #0288d1; outline: none; box-shadow: 0 0 0 3px rgba(3, 169, 244, 0.1); }
+    .editor { min-height: 300px; line-height: 1.6; }
+    .toolbar {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
+        margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+    .toolbar-group { display: flex; align-items: center; gap: 5px; padding-right: 10px; margin-right: 10px; border-right: 1px solid #ccc; }
+    .toolbar-group:last-child { border-right: none; }
+    .toolbar button, .toolbar input, .toolbar select {
+        padding: 6px 10px; border: 1px solid #ccc; background: #fff; cursor: pointer; border-radius: 4px;
+        display: flex; align-items: center; justify-content: center; font-family: inherit;
+    }
+    .toolbar input[type="color"] { width: 30px; height: 30px; padding: 2px; }
+    .btn { margin-top: 20px; padding: 12px 20px; border: 0; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background-color 0.3s; }
+    .btn-primary { background: #0288d1; color: #fff; }
+    .btn-primary:hover { background: #0277bd; }
+    .btn-secondary { background: #546e7a; color: #fff; }
+    .btn-secondary:hover { background: #455a64; }
+    .btn-ghost { background: #eceff1; color: #33475b; }
+    .btn-ghost:hover { background: #cfd8dc; }
+    .hidden { display: none; }
+    .post-list { margin-top: 40px; }
+    .post-item {
+        border-bottom: 1px solid #eee; padding: 12px 5px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    }
+    .post-item:hover { background-color: #f8f9fa; }
+    .post-details { flex-grow: 1; display: flex; flex-direction: column; }
+    .post-title { font-weight: bold; color: #01579b; }
+    .post-meta { font-size: 0.8rem; color: #5a7184; }
+    .post-actions { display: flex; gap: 8px; }
+    .post-actions button { font-size: 0.8rem; padding: 6px 12px; border-radius: 4px; cursor: pointer; border: 1px solid; }
+    .btn-edit { background-color: #e0f7fa; color: #00796b; border-color: #b2ebf2; }
+    .btn-edit:hover { background-color: #b2ebf2; }
+    .btn-delete { background: #fbe9e7; color: #c62828; border-color: #ffcdd2; }
+    .btn-delete:hover { background: #ffcdd2; }
+    #editor img.selected-image { outline: 3px solid #0288d1; box-shadow: 0 0 10px rgba(2, 136, 209, 0.5); }
+    #imageTools { margin-top: 10px; padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; display: flex; align-items: center; gap: 10px; }
+    .loading { color: #666; font-style: italic; }
+    .error { color: #c62828; background: #ffebee; padding: 10px; border-radius: 4px; margin: 10px 0; }
   </style>
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div class="card">
-    <h2>Đăng nhập / Đăng bài</h2>
-
-    <!-- Login -->
+    <!-- Login Section -->
     <div id="loginBox">
-      <label>Email</label><input id="email" type="email">
-      <label>Mật khẩu</label><input id="password" type="password">
+      <h2>Đăng nhập Quản trị</h2>
+      <label for="email">Email</label><input id="email" type="email">
+      <label for="password">Mật khẩu</label><input id="password" type="password">
       <button id="btnLogin" class="btn btn-primary">Đăng nhập</button>
-      <button id="btnSignup" class="btn btn-ghost">Đăng ký</button>
-      <div id="loginMsg" style="color:red;font-size:0.9rem"></div>
+      <div id="loginMsg" style="color:red;font-size:0.9rem;margin-top:10px;"></div>
     </div>
 
-    <!-- Post -->
+    <!-- Post Editor Section -->
     <div id="postBox" class="hidden">
-      <h3>Tạo bài mới</h3>
+      <h2 id="form-heading">Soạn thảo bài viết</h2>
       <form id="postForm">
-        <label>Tiêu đề</label><input id="postTitle" style="width:100%" required>
+        <label for="postTitle">Tiêu đề bài viết</label>
+        <input id="postTitle" type="text" required>
 
-        <!-- Toolbar -->
+        <label>Nội dung</label>
         <div class="toolbar">
-          <button type="button" onclick="format('bold')"><b>B</b></button>
-          <button type="button" onclick="format('italic')"><i>I</i></button>
-          <button type="button" onclick="format('underline')"><u>U</u></button>
-          <button type="button" onclick="format('justifyLeft')">Trái</button>
-          <button type="button" onclick="format('justifyCenter')">Giữa</button>
-          <button type="button" onclick="format('justifyRight')">Phải</button>
-          <button type="button" onclick="format('justifyFull')">Đều</button>
-          <input type="color" id="colorPicker" title="Chọn màu chữ">
-          <button type="button" onclick="changeFontSize('increase')">A+</button>
-          <button type="button" onclick="changeFontSize('decrease')">A-</button>
-          <button type="button" onclick="insertImageURL()">Ảnh URL</button>
-          <input type="file" id="imageUpload" accept="image/*">
+          <div class="toolbar-group">
+            <button type="button" onclick="format('bold')" title="In đậm"><b>B</b></button>
+            <button type="button" onclick="format('italic')" title="In nghiêng"><i>I</i></button>
+            <button type="button" onclick="format('underline')" title="Gạch chân"><u>U</u></button>
+          </div>
+          <!-- Menu chọn Font chữ -->
+          <div class="toolbar-group">
+            <select id="fontSelector" onchange="changeFont(this.value)" title="Chọn Font chữ">
+              <option value="Arial">Arial</option>
+              <option value="Verdana">Verdana</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Comic Sans MS">Comic Sans MS</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button type="button" onclick="format('justifyLeft')" title="Căn trái">Trái</button>
+            <button type="button" onclick="format('justifyCenter')" title="Căn giữa">Giữa</button>
+            <button type="button" onclick="format('justifyRight')" title="Căn phải">Phải</button>
+            <button type="button" onclick="format('justifyFull')" title="Căn đều">Đều</button>
+          </div>
+          <div class="toolbar-group">
+            <button type="button" onclick="changeFontSize('increase')" title="Tăng cỡ chữ">A+</button>
+            <button type="button" onclick="changeFontSize('decrease')" title="Giảm cỡ chữ">A-</button>
+            <input type="color" id="colorPicker" title="Chọn màu chữ">
+          </div>
+          <div class="toolbar-group">
+            <button type="button" onclick="insertImageURL()" title="Chèn ảnh từ URL">Ảnh URL</button>
+            <input type="file" id="imageUpload" accept="image/*" class="hidden">
+            <button type="button" onclick="document.getElementById('imageUpload').click()" title="Tải ảnh lên">Tải ảnh</button>
+          </div>
         </div>
-
-        <!-- Editor -->
         <div id="editor" class="editor" contenteditable="true"></div>
 
-        <!-- Resize selected image -->
-        <div id="imgTools" class="hidden">
-          <label>Chiều rộng (%)</label>
-          <input type="number" id="imgWidth" min="10" max="100" step="5" value="100">
-          <button type="button" onclick="applyImgSize()">Áp dụng</button>
+        <div id="imageTools" class="hidden">
+            <label>Kích thước ảnh:</label>
+            <button type="button" onclick="applyImageSize(25)">25%</button>
+            <button type="button" onclick="applyImageSize(50)">50%</button>
+            <button type="button" onclick="applyImageSize(75)">75%</button>
+            <button type="button" onclick="applyImageSize(100)">100%</button>
+            <input type="number" id="imageWidthInput" min="10" max="100" step="5" placeholder="%">
+            <button type="button" id="applyCustomSizeBtn">Áp dụng</button>
         </div>
 
-        <button class="btn btn-primary" type="submit">Đăng bài</button>
+        <button class="btn btn-primary" type="submit" id="submitBtn">Đăng bài</button>
+        <button type="button" id="cancelEditBtn" class="btn btn-ghost hidden" onclick="cancelEdit()">Hủy sửa</button>
         <button type="button" id="btnLogout" class="btn btn-ghost">Đăng xuất</button>
       </form>
-      <div id="status" style="margin-top:8px;font-size:0.9rem;color:green"></div>
+      <div id="status" style="margin-top:10px;font-size:0.9rem;color:green;"></div>
 
-      <!-- Danh sách bài -->
+      <!-- Post List Section -->
       <div class="post-list">
-        <h3>Bài đã đăng</h3>
-        <div id="myPosts"></div>
+        <h3>Bài viết của bạn</h3>
+        <div id="myPosts">Đang tải...</div>
       </div>
     </div>
   </div>
@@ -90,129 +146,437 @@
       appId: "1:38104930715:web:22c85f0b8462e96d47293e"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth=firebase.auth(), db=firebase.firestore();
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    const loginBox=document.getElementById('loginBox');
-    const postBox=document.getElementById('postBox');
-    const msg=document.getElementById('loginMsg');
-    const statusEl=document.getElementById('status');
-    const editor=document.getElementById('editor');
-    const imgTools=document.getElementById('imgTools');
-    let selectedImg=null;
+    const loginBox = document.getElementById('loginBox');
+    const postBox = document.getElementById('postBox');
+    const msg = document.getElementById('loginMsg');
+    const statusEl = document.getElementById('status');
+    const editor = document.getElementById('editor');
+    const imageTools = document.getElementById('imageTools');
+    const formHeading = document.getElementById('form-heading');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
 
-    // Auth
-    document.getElementById('btnLogin').onclick=()=>auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>msg.textContent=e.message);
-    document.getElementById('btnSignup').onclick=()=>auth.createUserWithEmailAndPassword(email.value,password.value)
-      .then(u=>u.user.sendEmailVerification())
-      .then(()=>msg.textContent="Đã tạo tài khoản, vui lòng xác thực email.")
-      .catch(e=>msg.textContent=e.message);
-    document.getElementById('btnLogout').onclick=()=>auth.signOut();
+    let selectedImage = null;
+    let editingPostId = null;
+    let currentUser = null;
 
-    auth.onAuthStateChanged(u=>{
-      if(u){
+    // Auth logic
+    document.getElementById('btnLogout').onclick = () => auth.signOut();
+    document.getElementById('btnLogin').onclick = () => {
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      auth.signInWithEmailAndPassword(email.value, password.value)
+        .catch(e => msg.textContent = e.message);
+    };
+
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      if (user) {
+        console.log("User logged in:", user.uid);
         loginBox.classList.add('hidden');
         postBox.classList.remove('hidden');
-        loadMyPosts();
-      }else{
+        // Đợi một chút để Firebase khởi tạo hoàn toàn
+        setTimeout(() => {
+          loadMyPosts();
+        }, 1000);
+      } else {
+        console.log("User logged out");
         loginBox.classList.remove('hidden');
         postBox.classList.add('hidden');
+        cancelEdit();
+        currentUser = null;
       }
     });
 
-    // Toolbar
-    function format(cmd){ document.execCommand(cmd,false,null); }
-    document.getElementById('colorPicker').addEventListener('input',e=>{
-      document.execCommand('foreColor',false,e.target.value);
-    });
-    function changeFontSize(action){
-      if(action==='increase') document.execCommand('fontSize',false,'5');
-      if(action==='decrease') document.execCommand('fontSize',false,'2');
+    // Toolbar functions
+    function format(cmd, value = null) { 
+      document.execCommand(cmd, false, value); 
+      editor.focus(); 
     }
-    function insertImageURL(){
-      const url=prompt("Nhập URL ảnh:");
-      if(url) document.execCommand('insertImage',false,url);
+
+    document.getElementById('colorPicker').addEventListener('input', e => format('foreColor', e.target.value));
+    
+    function changeFont(fontName) {
+      format('fontName', fontName);
     }
-    document.getElementById('imageUpload').addEventListener('change',async e=>{
-      const file=e.target.files[0];
-      if(file){
-        const reader=new FileReader();
-        reader.onload=()=>{ document.execCommand('insertImage',false,reader.result); };
+
+    function changeFontSize(action) {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (!range.collapsed) {
+          const span = document.createElement('span');
+          const currentSize = parseInt(window.getComputedStyle(range.commonAncestorContainer.parentElement || document.body).fontSize) || 16;
+          const newSize = action === 'increase' ? currentSize + 2 : Math.max(currentSize - 2, 10);
+          span.style.fontSize = newSize + 'px';
+          range.surroundContents(span);
+          selection.removeAllRanges();
+        }
+      }
+      editor.focus();
+    }
+
+    function insertImageURL() {
+      const url = prompt("Nhập URL hình ảnh:");
+      if (url) {
+        format('insertImage', url);
+      }
+    }
+
+    document.getElementById('imageUpload').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          format('insertImage', reader.result);
+        };
         reader.readAsDataURL(file);
       }
     });
 
-    // Resize ảnh khi click
-    editor.addEventListener('click',e=>{
-      if(e.target.tagName==="IMG"){
-        selectedImg=e.target;
-        document.getElementById('imgWidth').value=selectedImg.style.width.replace('%','')||100;
-        imgTools.classList.remove('hidden');
-      }else{
-        selectedImg=null;
-        imgTools.classList.add('hidden');
+    // Image tools logic
+    editor.addEventListener('click', (e) => {
+      if (selectedImage) {
+        selectedImage.classList.remove('selected-image');
+      }
+      
+      if (e.target.tagName === 'IMG') {
+        selectedImage = e.target;
+        selectedImage.classList.add('selected-image');
+        imageTools.classList.remove('hidden');
+      } else {
+        selectedImage = null;
+        imageTools.classList.add('hidden');
       }
     });
-    function applyImgSize(){
-      if(selectedImg){
-        const w=document.getElementById('imgWidth').value;
-        selectedImg.style.width=w+"%";
+
+    function applyImageSize(widthPercentage) {
+      if (selectedImage) {
+        selectedImage.style.width = widthPercentage + '%';
+        selectedImage.style.height = 'auto';
       }
     }
 
-    // Slugify
-    function slugify(str){
-      return str.toString().toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-        .replace(/[^a-z0-9]+/g,"-")
-        .replace(/(^-|-$)+/g,"");
+    document.getElementById('applyCustomSizeBtn').addEventListener('click', () => {
+      const customWidth = document.getElementById('imageWidthInput').value;
+      if (customWidth && selectedImage) {
+        applyImageSize(parseInt(customWidth));
+      }
+    });
+
+    // Slugify function
+    function slugify(str) {
+      return str
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
     }
 
-    // Submit
-    document.getElementById('postForm').onsubmit=async e=>{
+    // Submit / Update post
+    document.getElementById('postForm').onsubmit = async e => {
       e.preventDefault();
-      const titleEl=document.getElementById('postTitle');
-      const htmlContent=editor.innerHTML;
-      const slug=slugify(titleEl.value);
+      
+      if (!currentUser) {
+        alert("Bạn chưa đăng nhập!");
+        return;
+      }
+      
+      try {
+        const titleEl = document.getElementById('postTitle');
+        if (!titleEl.value.trim()) { 
+          alert("Vui lòng nhập tiêu đề!"); 
+          return; 
+        }
+        
+        if (selectedImage) {
+          selectedImage.classList.remove('selected-image');
+        }
+        
+        const postData = {
+          title: titleEl.value.trim(),
+          content: editor.innerHTML,
+          slug: slugify(titleEl.value),
+          authorUid: currentUser.uid,
+          authorEmail: currentUser.email
+        };
 
-      await db.collection('posts').add({
-        title:titleEl.value,
-        content:htmlContent,
-        slug:slug,
-        createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-        authorUid:auth.currentUser.uid,
-        authorEmail:auth.currentUser.email
-      });
+        if (editingPostId) {
+          // Chế độ cập nhật
+          statusEl.textContent = "Đang cập nhật..."; 
+          statusEl.style.color = "blue";
+          
+          // Thêm timestamp cho việc cập nhật
+          postData.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+          
+          await db.collection('posts').doc(editingPostId).update(postData);
+          statusEl.textContent = "✅ Cập nhật thành công!";
+          statusEl.style.color = "green";
+          cancelEdit();
+        } else {
+          // Chế độ tạo mới
+          statusEl.textContent = "Đang đăng..."; 
+          statusEl.style.color = "blue";
+          postData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection('posts').add(postData);
+          statusEl.textContent = "✅ Đăng thành công!";
+          statusEl.style.color = "green";
+          
+          // Reset form
+          titleEl.value = "";
+          editor.innerHTML = "";
+        }
 
-      statusEl.textContent="✅ Đăng thành công!";
-      titleEl.value="";
-      editor.innerHTML="";
-      loadMyPosts();
+        setTimeout(() => {
+          statusEl.textContent = "";
+        }, 3000);
+
+      } catch (error) {
+        console.error("Lỗi khi đăng/cập nhật bài:", error);
+        statusEl.textContent = "❌ Có lỗi xảy ra: " + error.message;
+        statusEl.style.color = "red";
+      }
     };
 
-    // Load & xóa bài
-    function loadMyPosts(){
-      db.collection('posts').orderBy("createdAt","desc").onSnapshot(snap=>{
-        const list=document.getElementById('myPosts');
-        list.innerHTML="";
-        snap.forEach(doc=>{
-          const d=doc.data();
-          const div=document.createElement('div');
-          div.className="post-item";
-          let buttons="";
-          if(auth.currentUser && d.authorUid===auth.currentUser.uid){
-            buttons=`<button onclick="deletePost('${doc.id}')">Xóa</button>`;
-          }
-          div.innerHTML=`<span>${d.title}</span>${buttons}`;
-          list.appendChild(div);
+    // Hàm để bắt đầu sửa bài viết
+    async function editPost(id) {
+        if (!currentUser) {
+            alert("Bạn chưa đăng nhập!");
+            return;
+        }
+        
+        try {
+            statusEl.textContent = "Đang tải bài viết...";
+            statusEl.style.color = "blue";
+            
+            const doc = await db.collection('posts').doc(id).get();
+            if (!doc.exists) {
+                alert("Bài viết không tồn tại!");
+                statusEl.textContent = "";
+                return;
+            }
+            
+            const data = doc.data();
+            
+            // Kiểm tra quyền sở hữu
+            if (data.authorUid !== currentUser.uid) {
+                alert("Bạn không có quyền chỉnh sửa bài viết này!");
+                statusEl.textContent = "";
+                return;
+            }
+            
+            editingPostId = id;
+            document.getElementById('postTitle').value = data.title || '';
+            editor.innerHTML = data.content || '';
+
+            // Cập nhật UI sang chế độ sửa
+            formHeading.textContent = "Chỉnh sửa bài viết";
+            submitBtn.textContent = "Cập nhật bài viết";
+            cancelEditBtn.classList.remove('hidden');
+
+            statusEl.textContent = "✅ Đã tải bài viết để chỉnh sửa";
+            statusEl.style.color = "green";
+            setTimeout(() => statusEl.textContent = "", 2000);
+
+            // Cuộn lên đầu trang
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+            console.error("Lỗi khi tải bài viết để sửa: ", error);
+            statusEl.textContent = "❌ Lỗi khi tải bài viết: " + error.message;
+            statusEl.style.color = "red";
+        }
+    }
+
+    // Hàm để hủy chế độ sửa
+    function cancelEdit() {
+        editingPostId = null;
+        document.getElementById('postTitle').value = '';
+        editor.innerHTML = '';
+
+        // Reset UI về chế độ tạo mới
+        formHeading.textContent = "Soạn thảo bài viết";
+        submitBtn.textContent = "Đăng bài";
+        cancelEditBtn.classList.add('hidden');
+        
+        // Ẩn image tools nếu đang hiển thị
+        imageTools.classList.add('hidden');
+        selectedImage = null;
+        
+        statusEl.textContent = "";
+    }
+
+    // Load posts - SỬA LẠI HOÀN TOÀN
+    function loadMyPosts() {
+        if (!currentUser) {
+            console.log("No user logged in, cannot load posts");
+            return;
+        }
+        
+        const list = document.getElementById('myPosts');
+        list.innerHTML = '<div class="loading">Đang tải bài viết...</div>';
+        
+        console.log("Loading posts for user:", currentUser.uid);
+        
+        // Thử cách 1: Query với where clause
+        db.collection('posts')
+          .where('authorUid', '==', currentUser.uid)
+          .get()
+          .then(snapshot => {
+              console.log("Query result size:", snapshot.size);
+              displayPosts(snapshot, list);
+          })
+          .catch(error => {
+              console.error("Error with where query:", error);
+              // Nếu lỗi, thử cách 2: Lấy tất cả và filter
+              loadAllPostsAndFilter(list);
+          });
+    }
+
+    // Fallback method: Load all posts and filter
+    function loadAllPostsAndFilter(list) {
+        console.log("Trying fallback method: load all posts and filter");
+        
+        db.collection('posts')
+          .get()
+          .then(snapshot => {
+              console.log("All posts loaded, size:", snapshot.size);
+              
+              // Filter posts của user hiện tại
+              const userPosts = [];
+              snapshot.forEach(doc => {
+                  const data = doc.data();
+                  if (data.authorUid === currentUser.uid) {
+                      userPosts.push({ id: doc.id, data: data });
+                  }
+              });
+              
+              console.log("User posts found:", userPosts.length);
+              displayUserPosts(userPosts, list);
+          })
+          .catch(error => {
+              console.error("Error loading all posts:", error);
+              list.innerHTML = `<div class="error">Lỗi khi tải bài viết: ${error.message}</div>`;
+          });
+    }
+
+    // Display posts from snapshot
+    function displayPosts(snapshot, list) {
+        if (snapshot.empty) {
+            list.innerHTML = "<p>Bạn chưa có bài viết nào.</p>";
+            return;
+        }
+        
+        list.innerHTML = "";
+        const posts = [];
+        
+        snapshot.forEach(doc => {
+            posts.push({ id: doc.id, data: doc.data() });
         });
-      });
+        
+        // Sort by created date (newest first)
+        posts.sort((a, b) => {
+            const timeA = a.data.createdAt ? a.data.createdAt.toDate() : new Date(0);
+            const timeB = b.data.createdAt ? b.data.createdAt.toDate() : new Date(0);
+            return timeB - timeA;
+        });
+        
+        displayUserPosts(posts, list);
     }
-    async function deletePost(id){
-      if(confirm("Bạn có chắc muốn xóa bài này?")){
-        await db.collection('posts').doc(id).delete();
-        alert("Đã xóa!");
-      }
+
+    // Display user posts array
+    function displayUserPosts(posts, list) {
+        if (posts.length === 0) {
+            list.innerHTML = "<p>Bạn chưa có bài viết nào.</p>";
+            return;
+        }
+        
+        list.innerHTML = "";
+        
+        posts.forEach(post => {
+            const { id, data } = post;
+            const div = document.createElement('div');
+            div.className = "post-item";
+            
+            let dateStr = "Không có ngày";
+            if (data.createdAt) {
+                try {
+                    if (typeof data.createdAt.toDate === 'function') {
+                        dateStr = data.createdAt.toDate().toLocaleDateString('vi-VN');
+                    } else if (data.createdAt instanceof Date) {
+                        dateStr = data.createdAt.toLocaleDateString('vi-VN');
+                    }
+                } catch (e) {
+                    console.log("Error parsing date:", e);
+                }
+            }
+
+            div.innerHTML = `
+                <div class="post-details">
+                    <span class="post-title">${data.title || 'Không có tiêu đề'}</span>
+                    <span class="post-meta">Ngày đăng: ${dateStr}</span>
+                </div>
+                <div class="post-actions">
+                    <button class="btn-edit" onclick="editPost('${id}')">Sửa</button>
+                    <button class="btn-delete" onclick="deletePost('${id}')">Xóa</button>
+                </div>`;
+            list.appendChild(div);
+        });
+        
+        console.log("Displayed", posts.length, "posts");
     }
+    
+    // Delete post
+    async function deletePost(id) {
+        if (!currentUser) {
+            alert("Bạn chưa đăng nhập!");
+            return;
+        }
+        
+        if (confirm("Bạn có chắc muốn xóa vĩnh viễn bài này?")) {
+            try {
+                // Kiểm tra quyền sở hữu trước khi xóa
+                const doc = await db.collection('posts').doc(id).get();
+                if (doc.exists && doc.data().authorUid === currentUser.uid) {
+                    await db.collection('posts').doc(id).delete();
+                    statusEl.textContent = "✅ Đã xóa bài viết!";
+                    statusEl.style.color = "green";
+                    setTimeout(() => statusEl.textContent = "", 3000);
+                    
+                    // Reload posts
+                    loadMyPosts();
+                } else {
+                    alert("Bạn không có quyền xóa bài viết này!");
+                }
+            } catch (error) {
+                console.error("Lỗi khi xóa bài viết: ", error);
+                statusEl.textContent = "❌ Lỗi khi xóa: " + error.message;
+                statusEl.style.color = "red";
+            }
+        }
+    }
+
+    // Debug function - có thể gọi từ console
+    window.debugFirestore = function() {
+        console.log("Current user:", currentUser);
+        console.log("Auth user:", auth.currentUser);
+        
+        if (currentUser) {
+            db.collection('posts').get().then(snapshot => {
+                console.log("All posts in database:");
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    console.log("Post ID:", doc.id, "AuthorUID:", data.authorUid, "Title:", data.title);
+                });
+            });
+        }
+    };
   </script>
 </body>
 </html>

@@ -14,30 +14,6 @@
     </script>
     <title>Trường Mầm Non Ngôi Sao Xanh</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Thêm style cho bản đồ và thống kê */
-        .map-container {
-            height: 300px;
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        .statistics {
-            background-color: #fff;
-            padding: 1rem;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .statistics h3 {
-            font-size: 1.1rem;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-        .statistics p {
-            font-size: 0.9rem;
-            color: #666;
-            margin: 0.3rem 0;
-        }
-    </style>
 </head>
 <body>
     <!-- Nút hamburger và overlay cho mobile -->
@@ -52,9 +28,9 @@
         <div class="header-container">
             <img src="logo.png" alt="Logo Trường Mầm Non Ngôi Sao Xanh" class="logo">
             <div class="header-text">
-                <h1>ỦY BAN NHÂN DÂN QUẬN THANH KHÊ</h1>
+                <h1>PHƯỜNG AN KHÊ - TP ĐÀ NẴNG</h1>
                 <h2>Trường Mầm Non Ngôi Sao Xanh</h2>
-                <p>122 Huỳnh Ngọc Huệ, Q. Thanh Khê, Đà Nẵng<br>Điện thoại: 0236727466 | Email: ngoisaoxanh114@gmail.com<br><a href="https://www.facebook.com/103755418223477?ref=embed_page" target="_blank">Facebook: Trường Mầm Non Ngôi Sao Xanh</a></p>
+                <p>122 Huỳnh Ngọc Huệ, P. An Khê, Đà Nẵng<br>Điện thoại: 0236727466 | Email: ngoisaoxanh114@gmail.com<br><a href="https://www.facebook.com/103755418223477?ref=embed_page" target="_blank">Facebook: Trường Mầm Non Ngôi Sao Xanh</a></p>
             </div>
         </div>
         <nav class="menu" id="main-menu">
@@ -83,15 +59,11 @@
             </div>
             <div class="notification">
                 <h3>Địa Chỉ Trường</h3>
-                <div class="map-container">
+                <div class="map-container" style="height: 300px; width: 100%; margin-bottom: 1rem;">
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3834.0845542939505!2d108.18256191033828!3d16.061101484553024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421906ae508f9d%3A0x35f41e293a4d4335!2zVHLGsOG7nW5nIG3huqdtIG5vbiBOZ8O0aSBTYW8gWGFuaA!5e0!3m2!1svi!2s!4v1742953428105!5m2!1svi!2s"
-                        width="100%"
-                        height="100%"
-                        style="border:0;"
-                        allowfullscreen=""
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade">
+                        width="100%" height="100%" style="border:0;"
+                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
                 </div>
             </div>
@@ -140,9 +112,9 @@
                 <div class="event-item welcome">
                     <h2>Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình</h2>
                 </div>
-            <div class="event-item event-menu">
-                <a href="menu.html" class="menu-link" id="thucDonLink">Đang tải...</a>
-            </div>
+                <div class="event-item event-menu">
+                    <a href="menu.html" class="menu-link" id="thucDonLink">Đang tải...</a>
+                </div>
             </div>
         </section>
     </main>
@@ -167,7 +139,7 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
 
-      // --- Tải bài viết (giữ nguyên) ---
+      // --- Tải bài viết ---
       const postsEl = document.getElementById('posts');
       const noPostsEl = document.getElementById('noPosts');
       db.collection('posts').orderBy('createdAt','desc')
@@ -210,6 +182,5 @@
           }
         });
     </script>
-
 </body>
 </html>

@@ -5,16 +5,23 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Admin — Cài đặt nội dung</title>
   <style>
-    body{font-family:Arial,sans-serif;background:#f0f4f8;padding:20px}
-    .card{background:#fff;padding:20px;border-radius:10px;max-width:900px;margin:auto;box-shadow:0 6px 18px rgba(0,0,0,0.1)}
-    label{font-weight:bold;margin-top:15px;display:block}
-    input, textarea{width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;}
+    body{font-family:Arial,sans-serif;background:#e3f2fd;padding:20px; color: #33475b;}
+    .card{background:#fff;padding:25px;border-radius:10px;max-width:900px;margin:auto;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    h2 { color: #01579b; }
+    p { line-height: 1.5; }
+    label{font-weight:bold;margin-top:15px;display:block; margin-bottom: 5px;}
+    input, textarea{width:100%;padding:10px;margin-top:4px;border:1px solid #b0bec5;border-radius:6px;box-sizing:border-box; transition: border-color 0.3s;}
+    input:focus, textarea:focus { border-color: #0288d1; outline: none; }
     textarea{min-height:120px;font-family:inherit;font-size:inherit; line-height: 1.5;}
-    .btn{margin-top:12px;padding:10px 14px;border:0;border-radius:6px;cursor:pointer}
-    .btn-primary{background:#0b7285;color:#fff}
-    .btn-ghost{background:#eee}
+    .btn{margin-top:20px;padding:10px 16px;border:0;border-radius:6px;cursor:pointer; font-weight: bold; font-size: 1rem;}
+    .btn-primary{background:#0288d1;color:#fff}
+    .btn-primary:hover{background:#0277bd;}
+    .btn-ghost{background:#eceff1; color: #33475b;}
+    .btn-ghost:hover{background:#cfd8dc;}
     .hidden{display:none}
     #status{margin-top:10px;font-size:0.9rem;font-weight:bold;}
+    .card a { color: #0288d1; font-weight: bold; text-decoration: none;}
+    .card a:hover { text-decoration: underline; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -31,10 +38,10 @@
 
     <!-- Login -->
     <div id="loginBox">
-      <label>Email</label><input id="email" type="email">
-      <label>Mật khẩu</label><input id="password" type="password">
+      <label for="email">Email</label><input id="email" type="email">
+      <label for="password">Mật khẩu</label><input id="password" type="password">
       <button id="btnLogin" class="btn btn-primary">Đăng nhập</button>
-      <div id="loginMsg" style="color:red;font-size:0.9rem"></div>
+      <div id="loginMsg" style="color:red;font-size:0.9rem; margin-top: 10px;"></div>
     </div>
 
     <!-- Settings Form -->
@@ -63,6 +70,7 @@
   </div>
 
   <script>
+    // ... JavaScript không thay đổi ...
     const firebaseConfig = {
       apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
       authDomain: "baivietwebngoisaoxanh.firebaseapp.com",
@@ -93,12 +101,7 @@
         settingsBox.classList.add('hidden');
       }
     });
-
-    /**
-     * Chuyển đổi chuỗi HTML <li> thành văn bản thuần túy (mỗi <li> một dòng)
-     * @param {string} html - Chuỗi HTML đầu vào. Ví dụ: "<li>Dòng 1</li><li>Dòng 2</li>"
-     * @returns {string} - Văn bản thuần túy. Ví dụ: "Dòng 1\nDòng 2"
-     */
+    
     function liToPlainText(html) {
         if (!html) return '';
         const tempDiv = document.createElement('div');
@@ -107,21 +110,15 @@
         return Array.from(items).map(li => li.textContent).join('\n');
     }
 
-    /**
-     * Chuyển đổi văn bản thuần túy (mỗi dòng một mục) thành chuỗi HTML <li>
-     * @param {string} text - Văn bản thuần túy. Ví dụ: "Dòng 1\nDòng 2"
-     * @returns {string} - Chuỗi HTML. Ví dụ: "<li>Dòng 1</li><li>Dòng 2</li>"
-     */
     function plainTextToLi(text) {
         if (!text) return '';
         return text.split('\n')
                    .map(line => line.trim())
-                   .filter(line => line) // Bỏ qua các dòng trống
+                   .filter(line => line) 
                    .map(line => `<li>${line}</li>`)
                    .join('');
     }
 
-    // Tải cài đặt hiện tại vào form
     async function loadSettings() {
       try {
         const doc = await contentDocRef.get();
@@ -142,7 +139,6 @@
       }
     }
 
-    // Lưu cài đặt
     document.getElementById('settingsForm').onsubmit = async e => {
       e.preventDefault();
       statusEl.textContent = 'Đang lưu...';
