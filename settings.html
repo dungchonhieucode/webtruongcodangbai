@@ -27,11 +27,13 @@
     .image-item { display: flex; align-items: center; gap: 15px; padding: 10px; border-bottom: 1px solid #eee; }
     .image-item:last-child { border-bottom: none; }
     .image-item img { width: 100px; height: 75px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
-    .image-item input[type="url"] { flex-grow: 1; }
   </style>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 </head>
 <body>
   <div class="card">
@@ -44,7 +46,7 @@
       <div id="loginMsg" style="color:red;font-size:0.9rem; margin-top: 10px;"></div>
     </div>
 
-    <!-- Settings Box (Main Content) -->
+    <!-- Settings Box -->
     <div id="settingsBox" class="hidden">
       <p style="text-align: right; margin-top:0;">
         <a href="admin.html">Quản lý bài viết</a> | 
@@ -56,16 +58,16 @@
       <h2>Cài đặt nội dung trang chủ</h2>
       <form id="settingsForm">
         <label for="thongBaoBe">Thông Báo Cho Bé (mỗi thông báo một dòng)</label>
-        <textarea id="thongBaoBe" required placeholder="Ngày hội Bé Vui Chơi: 05/03/2025"></textarea>
+        <textarea id="thongBaoBe" required></textarea>
         <label for="thongBaoPhuHuynh">Thông Báo Cho Phụ Huynh (mỗi thông báo một dòng)</label>
-        <textarea id="thongBaoPhuHuynh" required placeholder="Họp phụ huynh: 08/03/2025"></textarea>
+        <textarea id="thongBaoPhuHuynh" required></textarea>
         <label for="thongBaoChung">Thông Báo Chung</label>
         <textarea id="thongBaoChung" required rows="3"></textarea>
-        <label for="welcomeMessage">Nội dung Chào mừng (xuống dòng để ngắt câu)</label>
+        <label for="welcomeMessage">Nội dung Chào mừng</label>
         <textarea id="welcomeMessage" required rows="3"></textarea>
-        <label for="thucDonText">Văn bản hiển thị của Thực đơn</label>
+        <label for="thucDonText">Văn bản Thực đơn</label>
         <input id="thucDonText" type="text" required>
-        <label for="thucDonLink">Đường dẫn của Thực đơn</label>
+        <label for="thucDonLink">Đường dẫn Thực đơn</label>
         <input id="thucDonLink" type="text" required>
         <button class="btn btn-primary" type="submit">Lưu cài đặt nội dung</button>
         <div id="statusContent" class="status-msg"></div>
@@ -76,10 +78,10 @@
       <!-- Section 2: Slider Settings -->
       <h2>Quản lý hình ảnh Slider</h2>
       <div id="sliderManager">
-        <form id="add-form" style="margin-bottom:20px;">
-            <label for="newImageUrl">Thêm URL ảnh mới:</label>
-            <input type="url" id="newImageUrl" placeholder="https://..." required>
-            <button type="submit" class="btn btn-primary">Thêm ảnh</button>
+        <form id="upload-form" style="margin-bottom:20px;">
+            <label for="newImageFile">Upload ảnh mới (JPG, PNG):</label>
+            <input type="file" id="newImageFile" accept="image/*" required>
+            <button type="submit" class="btn btn-primary">Tải lên</button>
         </form>
         <h3>Danh sách ảnh hiện tại (<span id="image-count">0</span>/20)</h3>
         <ul id="image-list"><li>Đang tải...</li></ul>
@@ -89,27 +91,28 @@
   </div>
 
   <script>
-    // --- Firebase Config and General Setup ---
+    // --- Firebase Config ---
     const firebaseConfig = {
       apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
       authDomain: "baivietwebngoisaoxanh.firebaseapp.com",
       projectId: "baivietwebngoisaoxanh",
+      storageBucket: "baivietwebngoisaoxanh.appspot.com",
       appId: "1:38104930715:web:22c85f0b8462e96d47293e"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage();
     
     const contentDocRef = db.collection('site_content').doc('dynamic_content');
     const sliderDocRef = db.collection('site_content').doc('slider_images_url');
 
-    // --- General UI Elements ---
     const loginBox = document.getElementById('loginBox');
     const settingsBox = document.getElementById('settingsBox');
     const msg = document.getElementById('loginMsg');
-    
-    // --- Auth Logic ---
-    document.getElementById('btnLogin').onclick = () => auth.signInWithEmailAndPassword(email.value, password.value).catch(e => msg.textContent = e.message);
+
+    document.getElementById('btnLogin').onclick = () =>
+      auth.signInWithEmailAndPassword(email.value, password.value).catch(e => msg.textContent = e.message);
     document.getElementById('btnLogout').onclick = () => auth.signOut();
 
     auth.onAuthStateChanged(user => {
@@ -123,10 +126,9 @@
         settingsBox.classList.add('hidden');
       }
     });
-    
-    // --- SECTION 1: CONTENT SETTINGS ---
+
+    // --- Content Settings ---
     const statusContentEl = document.getElementById('statusContent');
-    
     function liToPlainText(html) { return html ? Array.from(new DOMParser().parseFromString(`<ul>${html}</ul>`, "text/html").querySelectorAll('li')).map(li => li.textContent).join('\n') : ''; }
     function plainTextToLi(text) { return text ? text.split('\n').map(l=>l.trim()).filter(l=>l).map(l=>`<li>${l}</li>`).join('') : ''; }
 
@@ -163,70 +165,77 @@
       setTimeout(() => statusContentEl.textContent = '', 4000);
     };
 
-    // --- SECTION 2: SLIDER SETTINGS ---
+    // --- Slider Settings ---
     const imageList = document.getElementById('image-list');
     const statusSliderEl = document.getElementById('statusSlider');
     let currentImages = [];
 
     function loadSliderImages() {
-        sliderDocRef.onSnapshot(doc => {
-            imageList.innerHTML = '';
-            if (doc.exists && doc.data().images) {
-                currentImages = doc.data().images;
-                document.getElementById('image-count').textContent = currentImages.length;
-                currentImages.forEach(img => {
-                    const li = document.createElement('li');
-                    li.className = 'image-item';
-                    li.innerHTML = `
-                        <img src="${img.url}" alt="Preview" onerror="this.src='https://via.placeholder.com/100x75?text=Error'">
-                        <input type="url" class="url-input" id="input-${img.id}" value="${img.url}">
-                        <div>
-                            <button class="btn btn-primary" onclick="updateImage('${img.id}')">Lưu</button>
-                            <button class="btn btn-danger" onclick="deleteImage('${img.id}')">Xóa</button>
-                        </div>`;
-                    imageList.appendChild(li);
-                });
-            } else {
-                currentImages = [];
-                document.getElementById('image-count').textContent = 0;
-                imageList.innerHTML = '<li>Chưa có ảnh nào.</li>';
-            }
-        });
+      sliderDocRef.onSnapshot(doc => {
+        imageList.innerHTML = '';
+        if (doc.exists && doc.data().images) {
+          currentImages = doc.data().images;
+          document.getElementById('image-count').textContent = currentImages.length;
+          currentImages.forEach(img => {
+            const li = document.createElement('li');
+            li.className = 'image-item';
+            li.innerHTML = `
+              <img src="${img.url}" alt="Preview" onerror="this.src='https://via.placeholder.com/100x75?text=Error'">
+              <div>
+                  <button class="btn btn-danger" onclick="deleteImage('${img.id}')">Xóa</button>
+              </div>`;
+            imageList.appendChild(li);
+          });
+        } else {
+          currentImages = [];
+          document.getElementById('image-count').textContent = 0;
+          imageList.innerHTML = '<li>Chưa có ảnh nào.</li>';
+        }
+      });
     }
 
-    document.getElementById('add-form').onsubmit = async (e) => {
-        e.preventDefault();
-        if (currentImages.length >= 20) {
-            alert('Đã đạt số lượng ảnh tối đa (20 ảnh).'); return;
-        }
-        const newUrl = document.getElementById('newImageUrl').value;
-        if (!newUrl) return;
-        const newImage = { id: new Date().getTime().toString(), url: newUrl };
-        
-        statusSliderEl.textContent = 'Đang thêm...';
+    document.getElementById('upload-form').onsubmit = async (e) => {
+      e.preventDefault();
+      if (currentImages.length >= 20) {
+        alert('Đã đạt số lượng ảnh tối đa (20 ảnh).');
+        return;
+      }
+      const file = document.getElementById('newImageFile').files[0];
+      if (!file) return;
+
+      const imageId = new Date().getTime().toString();
+      const storageRef = storage.ref(`slider/${imageId}-${file.name}`);
+      statusSliderEl.textContent = "Đang tải ảnh...";
+      try {
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        const newImage = { id: imageId, url: url };
         await sliderDocRef.set({ images: firebase.firestore.FieldValue.arrayUnion(newImage) }, { merge: true });
-        document.getElementById('newImageUrl').value = '';
-        statusSliderEl.textContent = '✅ Thêm thành công!';
-        setTimeout(() => statusSliderEl.textContent = '', 3000);
+        statusSliderEl.style.color = "green";
+        statusSliderEl.textContent = "✅ Tải lên thành công!";
+      } catch (err) {
+        statusSliderEl.style.color = "red";
+        statusSliderEl.textContent = "Lỗi: " + err.message;
+      }
+      setTimeout(() => statusSliderEl.textContent = '', 3000);
     };
 
-    window.updateImage = async (id) => {
-        const newUrl = document.getElementById(`input-${id}`).value;
-        const updatedImages = currentImages.map(img => img.id === id ? { ...img, url: newUrl } : img);
-        statusSliderEl.textContent = 'Đang cập nhật...';
-        await sliderDocRef.update({ images: updatedImages });
-        statusSliderEl.textContent = '✅ Cập nhật thành công!';
-        setTimeout(() => statusSliderEl.textContent = '', 3000);
-    };
-    
     window.deleteImage = async (id) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa ảnh này không?')) return;
-        const imageToDelete = currentImages.find(img => img.id === id);
-        if (!imageToDelete) return;
-        statusSliderEl.textContent = 'Đang xóa...';
+      if (!confirm("Bạn có chắc muốn xóa ảnh này?")) return;
+      const imageToDelete = currentImages.find(img => img.id === id);
+      if (!imageToDelete) return;
+
+      try {
         await sliderDocRef.update({ images: firebase.firestore.FieldValue.arrayRemove(imageToDelete) });
-        statusSliderEl.textContent = '✅ Xóa thành công!';
-        setTimeout(() => statusSliderEl.textContent = '', 3000);
+        const fileRef = storage.refFromURL(imageToDelete.url);
+        await fileRef.delete();
+        statusSliderEl.style.color = "green";
+        statusSliderEl.textContent = "✅ Đã xóa ảnh!";
+      } catch (err) {
+        statusSliderEl.style.color = "red";
+        statusSliderEl.textContent = "Lỗi khi xóa: " + err.message;
+      }
+      setTimeout(() => statusSliderEl.textContent = '', 3000);
     };
   </script>
 </body>
