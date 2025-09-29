@@ -1,27 +1,23 @@
-// Thêm vào đầu file script.js
+// --- Xử lý menu mobile ---
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menu-toggle');
     const mainMenu = document.getElementById('main-menu');
     const overlay = document.getElementById('overlay');
 
     if (menuToggle && mainMenu && overlay) {
-        // Sự kiện khi bấm vào nút hamburger
         menuToggle.addEventListener('click', () => {
             mainMenu.classList.toggle('is-open');
             overlay.classList.toggle('is-open');
             menuToggle.classList.toggle('active');
         });
 
-        // Sự kiện khi bấm vào lớp phủ (để đóng menu)
         overlay.addEventListener('click', () => {
             mainMenu.classList.remove('is-open');
             overlay.classList.remove('is-open');
             menuToggle.classList.remove('active');
         });
 
-        // Đóng menu khi bấm vào menu item (trên mobile)
-        const menuItems = document.querySelectorAll('.menu-item');
-        menuItems.forEach(item => {
+        document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', () => {
                 if (window.innerWidth <= 768) {
                     mainMenu.classList.remove('is-open');
@@ -33,121 +29,127 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- PHẦN CODE CŨ VẪN GIỮ NGUYÊN ---
+// --- SLIDER NGẪU NHIÊN HIỆU ỨNG ---
+function initializeSlider() {
+    const imageElements = document.querySelectorAll('.main-image');
+    const dots = document.querySelectorAll('.dot');
+    let currentImageIndex = 0;
+    let isAnimating = false;
 
-// Thay đổi hình ảnh trường mầm non mỗi 5 giây
-const images = [
-    'image1.jpg',
-    'image2.jpg',
-    'image3.jpg',
-    'image4.jpg',
-    'image5.jpg',
-];
-let currentImageIndex = 0;
-const imageElements = document.querySelectorAll('.main-image');
-const dots = document.querySelectorAll('.dot');
+    const effects = ["fade", "slide", "zoom", "flip"];
 
-function showImage(index) {
+    function applyEffect(oldImg, newImg, effect) {
+        return new Promise(resolve => {
+            oldImg.classList.remove("active", "fade", "slide", "zoom", "flip");
+            newImg.classList.remove("active", "fade", "slide", "zoom", "flip");
+
+            newImg.style.display = "block"; // đảm bảo hiển thị
+            newImg.offsetWidth; // trigger reflow để CSS transition chạy
+
+            switch (effect) {
+                case "fade":
+                    oldImg.classList.add("fade-out");
+                    newImg.classList.add("fade-in");
+                    break;
+                case "slide":
+                    oldImg.classList.add("slide-out");
+                    newImg.classList.add("slide-in");
+                    break;
+                case "zoom":
+                    oldImg.classList.add("zoom-out");
+                    newImg.classList.add("zoom-in");
+                    break;
+                case "flip":
+                    oldImg.classList.add("flip-out");
+                    newImg.classList.add("flip-in");
+                    break;
+            }
+
+            setTimeout(() => {
+                oldImg.style.display = "none";
+                oldImg.classList.remove("fade-out", "slide-out", "zoom-out", "flip-out");
+                newImg.classList.remove("fade-in", "slide-in", "zoom-in", "flip-in");
+                newImg.classList.add("active");
+                resolve();
+            }, 600); // thời gian khớp với CSS transition
+        });
+    }
+
+    function showImage(index) {
+        if (isAnimating || index === currentImageIndex) return;
+        isAnimating = true;
+        const oldImg = imageElements[currentImageIndex];
+        const newImg = imageElements[index];
+        const effect = effects[Math.floor(Math.random() * effects.length)];
+
+        dots.forEach((dot, i) => {
+            dot.classList.toggle("active", i === index);
+        });
+
+        applyEffect(oldImg, newImg, effect).then(() => {
+            currentImageIndex = index;
+            isAnimating = false;
+        });
+    }
+
+    function changeImage(direction = 1) {
+        const nextIndex = (currentImageIndex + direction + imageElements.length) % imageElements.length;
+        showImage(nextIndex);
+    }
+
+    document.querySelector('.prev').onclick = () => changeImage(-1);
+    document.querySelector('.next').onclick = () => changeImage(1);
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            const index = parseInt(dot.dataset.index);
+            showImage(index);
+        });
+    });
+
     imageElements.forEach((img, i) => {
-        img.classList.remove('active');
-        if (i === index) {
-            img.classList.add('active');
-        }
+        img.style.display = i === 0 ? "block" : "none";
     });
-    dots.forEach((dot, i) => {
-        dot.classList.remove('active');
-        if (i === index) {
-            dot.classList.add('active');
-        }
-    });
-    currentImageIndex = index;
+
+    setInterval(() => changeImage(1), 5000);
 }
 
-function changeImage(direction = 1) {
-    currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
-    showImage(currentImageIndex);
-}
-
-// Thêm hiệu ứng gợn sóng cho các nút menu
-const menuItems = document.querySelectorAll('.menu-item');
-
-menuItems.forEach(item => {
+// --- Hiệu ứng Ripple menu ---
+document.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', function(e) {
         let ripple = document.createElement('span');
         this.appendChild(ripple);
-        
         let x = e.clientX - this.getBoundingClientRect().left;
         let y = e.clientY - this.getBoundingClientRect().top;
-        
         ripple.style.left = `${x}px`;
         ripple.style.top = `${y}px`;
         ripple.classList.add('ripple');
-        
-        setTimeout(() => {
-            ripple.remove();
-        }, 600);
+        setTimeout(() => ripple.remove(), 600);
     });
 });
 
-// Thêm sự kiện cho nút bấm slider
-document.querySelector('.prev').addEventListener('click', () => changeImage(-1));
-document.querySelector('.next').addEventListener('click', () => changeImage(1));
-
-// Thêm sự kiện cho các nút dot
-dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-        const index = parseInt(dot.getAttribute('data-index'));
-        showImage(index);
-    });
-});
-
-// Khởi tạo hình ảnh đầu tiên
-showImage(currentImageIndex);
-
-// Tự động chuyển ảnh mỗi 5 giây
-setInterval(() => changeImage(1), 5000);
-
-// Hàm cập nhật thống kê truy cập
+// --- Thống kê ---
 function updateStatistics() {
-    // Mặc định hiển thị dữ liệu tĩnh khi chưa có dữ liệu từ Analytics
     let todayVisits = 125;
     let totalVisits = 15342;
     let onlineUsers = 8;
     let weeklyVisits = 892;
-    
-    // Kiểm tra xem API Google Analytics đã sẵn sàng chưa
+
     if (typeof gtag === 'function') {
-        // Lấy dữ liệu thống kê từ bộ nhớ cục bộ hoặc cập nhật từ server
         const stats = JSON.parse(localStorage.getItem('visitStats')) || {
-            today: 125,
-            total: 15342,
-            online: 8,
-            weekly: 892
+            today: 125, total: 15342, online: 8, weekly: 892
         };
-        
-        // Tăng số lượt truy cập
-        stats.today++;
-        stats.total++;
-        stats.weekly++;
-        
-        // Lưu lại vào bộ nhớ cục bộ
+        stats.today++; stats.total++; stats.weekly++;
         localStorage.setItem('visitStats', JSON.stringify(stats));
-        
-        // Gán giá trị
-        todayVisits = stats.today;
-        totalVisits = stats.total;
-        onlineUsers = stats.online;
-        weeklyVisits = stats.weekly;
-        
-        // Gửi sự kiện pageview đến Google Analytics
+        todayVisits = stats.today; totalVisits = stats.total;
+        onlineUsers = stats.online; weeklyVisits = stats.weekly;
         gtag('event', 'page_view', {
             page_title: document.title,
             page_location: window.location.href,
             page_path: window.location.pathname
         });
     }
-    
-    // Cập nhật UI
+
     const statsElements = document.querySelectorAll('.statistics p');
     if (statsElements.length >= 4) {
         statsElements[0].textContent = `Lượt truy cập hôm nay: ${todayVisits}`;
@@ -157,24 +159,20 @@ function updateStatistics() {
     }
 }
 
-// Xử lý resize window để đảm bảo menu hoạt động đúng
 window.addEventListener('resize', () => {
     const mainMenu = document.getElementById('main-menu');
     const overlay = document.getElementById('overlay');
     const menuToggle = document.getElementById('menu-toggle');
-    
     if (window.innerWidth > 768) {
-        // Trở về desktop, đóng menu mobile nếu đang mở
         if (mainMenu) mainMenu.classList.remove('is-open');
         if (overlay) overlay.classList.remove('is-open');
         if (menuToggle) menuToggle.classList.remove('active');
     }
 });
 
-// Ngăn cuộn trang khi menu mobile đang mở
 document.addEventListener('DOMContentLoaded', () => {
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                 const overlay = document.getElementById('overlay');
                 if (overlay && overlay.classList.contains('is-open')) {
@@ -185,12 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
     const overlay = document.getElementById('overlay');
-    if (overlay) {
-        observer.observe(overlay, { attributes: true });
-    }
+    if (overlay) observer.observe(overlay, { attributes: true });
 });
 
-// Gọi hàm cập nhật khi trang được tải
 document.addEventListener('DOMContentLoaded', updateStatistics);

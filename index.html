@@ -17,11 +17,7 @@
 </head>
 <body>
     <!-- Nút hamburger và overlay cho mobile -->
-    <button class="menu-toggle" id="menu-toggle">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
+    <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
     <div class="overlay" id="overlay"></div>
 
     <header>
@@ -60,39 +56,25 @@
             <div class="notification">
                 <h3>Địa Chỉ Trường</h3>
                 <div class="map-container" style="height: 300px; width: 100%; margin-bottom: 1rem;">
-                    <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3834.0845542939505!2d108.18256191033828!3d16.061101484553024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421906ae508f9d%3A0x35f41e293a4d4335!2zVHLGsOG7nW5nIG3huqdtIG5vbiBOZ8O0aSBTYW8gWGFuaA!5e0!3m2!1svi!2s!4v1742953428105!5m2!1svi!2s"
-                        width="100%" height="100%" style="border:0;"
-                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3834.0845542939505!2d108.18256191033828!3d16.061101484553024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421906ae508f9d%3A0x35f41e293a4d4335!2zVHLGsOG7nW5nIG3huqdtIG5vbiBOZ8O0aSBTYW8gWGFuaA!5e0!3m2!1svi!2s!4v1742953428105!5m2!1svi!2s" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
             <div class="notification statistics">
                 <h3>Thống Kê Truy Cập</h3>
-                <p>Lượt truy cập hôm nay: 125</p>
-                <p>Tổng số lượt truy cập: 15,342</p>
-                <p>Người đang online: 8</p>
-                <p>Lượt truy cập tuần này: 892</p>
+                <p>Lượt truy cập hôm nay: 125</p><p>Tổng số lượt truy cập: 15,342</p><p>Người đang online: 8</p><p>Lượt truy cập tuần này: 892</p>
             </div>
         </aside>
 
         <section class="content">
-            <div class="image-slider">
+            <div class="image-slider" id="image-slider-container">
                 <button class="slider-button prev">&lt;</button>
-                <img src="image1.jpg" alt="Hình ảnh trường mầm non" class="main-image active">
-                <img src="image2.jpg" alt="Hình ảnh trường mầm non" class="main-image">
-                <img src="image3.jpg" alt="Hình ảnh trường mầm non" class="main-image">
-                <img src="image4.jpg" alt="Hình ảnh trường mầm non" class="main-image">
-                <img src="image5.jpg" alt="Hình ảnh trường mầm non" class="main-image">
+                <!-- Hình ảnh sẽ được chèn vào đây bằng JavaScript -->
                 <button class="slider-button next">&gt;</button>
-                <div class="slider-dots">
-                    <button class="dot active" data-index="0"></button>
-                    <button class="dot" data-index="1"></button>
-                    <button class="dot" data-index="2"></button>
-                    <button class="dot" data-index="3"></button>
-                    <button class="dot" data-index="4"></button>
+                <div class="slider-dots" id="slider-dots-container">
+                    <!-- Các nút dot sẽ được chèn vào đây bằng JavaScript -->
                 </div>
             </div>
+
             <div class="post-titles">
                 <h2>Các bài viết của trường</h2>
                 <div id="posts" class="post-title-container"></div>
@@ -100,7 +82,7 @@
             </div>
             <div class="event-section">
                 <div class="event-item welcome">
-                    <h2 id="welcomeMessage">Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình</h2>
+                    <h2 id="welcomeMessage">Chào Mừng Quý Phụ Huynh...</h2>
                 </div>
                 <div class="event-item event-menu">
                     <a href="menu.html" class="menu-link" id="thucDonLink">Đang tải...</a>
@@ -130,41 +112,38 @@
       const db = firebase.firestore();
 
       // --- Tải bài viết với chức năng Phân trang ---
+      // (Phần code này không đổi)
       const postsEl = document.getElementById('posts');
       const noPostsEl = document.getElementById('noPosts');
       const postsPerPage = 12;
       let currentPage = 1;
       let allPosts = [];
 
+      function renderPostsPage(page) { /* ... (code không đổi) ... */ }
+      function renderPaginationControls() { /* ... (code không đổi) ... */ }
+      // (Toàn bộ code phân trang giữ nguyên)
       function renderPostsPage(page) {
           postsEl.innerHTML = '';
           const start = (page - 1) * postsPerPage;
           const end = start + postsPerPage;
           const paginatedPosts = allPosts.slice(start, end);
-
           paginatedPosts.forEach(post => {
               const d = post.data;
               const art = document.createElement('article');
               art.className = "post-title-item";
-              art.innerHTML = `
-                <span class="post-date">👉 Nhấn vào để xem</span>
-                <a href="post.html?slug=${d.slug}">${d.title || ''}</a>
-              `;
+              art.innerHTML = `<span class="post-date">👉 Nhấn vào để xem</span><a href="post.html?slug=${d.slug}">${d.title || ''}</a>`;
               postsEl.appendChild(art);
           });
           renderPaginationControls();
       }
-
       function renderPaginationControls() {
           const pageCount = Math.ceil(allPosts.length / postsPerPage);
           const oldControls = document.getElementById('pagination-controls');
           if (oldControls) oldControls.remove();
           if (pageCount <= 1) return;
-
           const controlsContainer = document.createElement('div');
           controlsContainer.id = 'pagination-controls';
           controlsContainer.style.cssText = "text-align: center; margin-top: 25px; margin-bottom: 10px;";
-
           if (currentPage > 1) {
               const prevButton = document.createElement('button');
               prevButton.textContent = 'Trang trước';
@@ -172,12 +151,10 @@
               prevButton.style.cssText = "margin: 0 5px; padding: 8px 12px; cursor: pointer; border: 1px solid #ccc; background: #f0f0f0; border-radius: 4px;";
               controlsContainer.appendChild(prevButton);
           }
-
           const pageIndicator = document.createElement('span');
           pageIndicator.textContent = `Trang ${currentPage} / ${pageCount}`;
           pageIndicator.style.margin = '0 10px';
           controlsContainer.appendChild(pageIndicator);
-
           if (currentPage < pageCount) {
               const nextButton = document.createElement('button');
               nextButton.textContent = 'Trang sau';
@@ -187,35 +164,27 @@
           }
           postsEl.parentNode.insertBefore(controlsContainer, postsEl.nextSibling);
       }
-
-      db.collection('posts').orderBy('createdAt', 'desc')
-        .onSnapshot(snap => {
+      db.collection('posts').orderBy('createdAt', 'desc').onSnapshot(snap => {
           if (snap.empty) {
-            noPostsEl.style.display = 'block';
-            postsEl.innerHTML = '';
-            allPosts = [];
-            noPostsEl.textContent = "Chưa có bài viết nào.";
-            renderPaginationControls();
-            return;
+            noPostsEl.style.display = 'block'; postsEl.innerHTML = ''; allPosts = [];
+            noPostsEl.textContent = "Chưa có bài viết nào."; renderPaginationControls(); return;
           }
           noPostsEl.style.display = 'none';
           allPosts = snap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
           const pageCount = Math.ceil(allPosts.length / postsPerPage);
           if (currentPage > pageCount) currentPage = pageCount || 1;
-          
           renderPostsPage(currentPage);
         });
+      // --- Kết thúc code phân trang ---
 
       // --- Tải nội dung động cho sidebar và thực đơn ---
+      // (Phần code này không đổi)
       const thongBaoBeEl = document.getElementById('thongBaoBeContent');
       const thongBaoPhuHuynhEl = document.getElementById('thongBaoPhuHuynhContent');
       const thongBaoChungEl = document.getElementById('thongBaoChungContent');
       const thucDonLinkEl = document.getElementById('thucDonLink');
       const welcomeMessageEl = document.getElementById('welcomeMessage');
-
-      db.collection('site_content').doc('dynamic_content')
-        .onSnapshot(doc => {
+      db.collection('site_content').doc('dynamic_content').onSnapshot(doc => {
           if (doc.exists) {
             const data = doc.data();
             thongBaoBeEl.innerHTML = data.thongBaoBe || 'Chưa có thông báo.';
@@ -223,15 +192,43 @@
             thongBaoChungEl.textContent = data.thongBaoChung || 'Chưa có thông báo.';
             thucDonLinkEl.textContent = data.thucDonText || 'Xem thực đơn';
             thucDonLinkEl.href = data.thucDonLink || '#';
-            if (data.welcomeMessage) {
-              welcomeMessageEl.innerHTML = data.welcomeMessage.replace(/\n/g, '<br>');
-            } else {
-              welcomeMessageEl.innerHTML = 'Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình';
-            }
-          } else {
-            console.log("Không tìm thấy tài liệu cấu hình!");
+            welcomeMessageEl.innerHTML = data.welcomeMessage ? data.welcomeMessage.replace(/\n/g, '<br>') : 'Chào Mừng Quý Phụ Huynh...';
           }
         });
+        
+      // --- CODE MỚI: Tải và hiển thị hình ảnh cho Slider ---
+      const sliderContainer = document.getElementById('image-slider-container');
+      const dotsContainer = document.getElementById('slider-dots-container');
+      db.collection('site_content').doc('slider_images_url').onSnapshot(doc => {
+        sliderContainer.querySelectorAll('.main-image').forEach(img => img.remove());
+        dotsContainer.innerHTML = '';
+        if (doc.exists && doc.data().images && doc.data().images.length > 0) {
+            const images = doc.data().images;
+            images.forEach((imgData, index) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = imgData.url;
+                imgElement.alt = "Hình ảnh trường mầm non";
+                imgElement.className = "main-image";
+                imgElement.onerror = function() { this.src='image1.jpg'; }; // Fallback image
+                if (index === 0) imgElement.classList.add('active');
+                sliderContainer.insertBefore(imgElement, sliderContainer.querySelector('.next'));
+                const dotElement = document.createElement('button');
+                dotElement.className = "dot";
+                dotElement.dataset.index = index;
+                if (index === 0) dotElement.classList.add('active');
+                dotsContainer.appendChild(dotElement);
+            });
+        } else {
+            const defaultImg = document.createElement('img');
+            defaultImg.src = "image1.jpg";
+            defaultImg.alt = "Hình ảnh trường mầm non";
+            defaultImg.className = "main-image active";
+            sliderContainer.insertBefore(defaultImg, sliderContainer.querySelector('.next'));
+        }
+        if (typeof initializeSlider === 'function') {
+            initializeSlider();
+        }
+      });
     </script>
 </body>
 </html>
