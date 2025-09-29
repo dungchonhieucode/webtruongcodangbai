@@ -56,6 +56,9 @@
         <label for="thongBaoChung">Thông Báo Chung</label>
         <textarea id="thongBaoChung" required rows="3"></textarea>
         
+        <label for="welcomeMessage">Nội dung Chào mừng (xuống dòng để ngắt câu)</label>
+        <textarea id="welcomeMessage" required rows="3" placeholder="Chào Mừng Quý Phụ Huynh Thăm Quan Website&#10;Chúc những gì tốt đẹp nhất đến với gia đình"></textarea>
+
         <label for="thucDonText">Văn bản hiển thị của Thực đơn</label>
         <input id="thucDonText" type="text" required>
         
@@ -70,7 +73,6 @@
   </div>
 
   <script>
-    // ... JavaScript không thay đổi ...
     const firebaseConfig = {
       apiKey: "AIzaSyBSZ7-5mr0ll5EP4BHUKC-InnYcu0Th1Tk",
       authDomain: "baivietwebngoisaoxanh.firebaseapp.com",
@@ -127,6 +129,7 @@
           document.getElementById('thongBaoBe').value = liToPlainText(data.thongBaoBe);
           document.getElementById('thongBaoPhuHuynh').value = liToPlainText(data.thongBaoPhuHuynh);
           document.getElementById('thongBaoChung').value = data.thongBaoChung || '';
+          document.getElementById('welcomeMessage').value = data.welcomeMessage || '';
           document.getElementById('thucDonText').value = data.thucDonText || '';
           document.getElementById('thucDonLink').value = data.thucDonLink || '';
         } else {
@@ -148,6 +151,7 @@
         thongBaoBe: plainTextToLi(document.getElementById('thongBaoBe').value),
         thongBaoPhuHuynh: plainTextToLi(document.getElementById('thongBaoPhuHuynh').value),
         thongBaoChung: document.getElementById('thongBaoChung').value,
+        welcomeMessage: document.getElementById('welcomeMessage').value,
         thucDonText: document.getElementById('thucDonText').value,
         thucDonLink: document.getElementById('thucDonLink').value,
       };

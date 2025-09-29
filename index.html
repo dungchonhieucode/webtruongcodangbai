@@ -98,19 +98,9 @@
                 <div id="posts" class="post-title-container"></div>
                 <div id="noPosts" style="text-align:center;color:#666">Đang tải...</div>
             </div>
-            <div class="posts">
-                <article class="post">
-                    <h3>Góc học tập sáng tạo</h3>
-                    <p>Ngày 10/02/2025, các bé tham gia vẽ tranh, làm đồ thủ công và chơi trò chơi giáo dục.</p>
-                </article>
-                <article class="post">
-                    <h3>Ngày hội thể thao vui nhộn</h3>
-                    <p>Ngày 25/05/2025, các bé tham gia chạy đua, nhảy bao bố và thi kéo co, tạo không khí vui tươi.</p>
-                </article>
-            </div>
             <div class="event-section">
                 <div class="event-item welcome">
-                    <h2>Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình</h2>
+                    <h2 id="welcomeMessage">Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình</h2>
                 </div>
                 <div class="event-item event-menu">
                     <a href="menu.html" class="menu-link" id="thucDonLink">Đang tải...</a>
@@ -120,7 +110,7 @@
     </main>
 
     <footer>
-        <p>Bản quyền trang website thuộc về Trường Mầm non Ngôi Sao Xanh, 122 Huỳnh Ngọc Huệ, Đà Nẵng.</p>
+        <p>Bản quyền trang website thuộc về Trường Mầm non Ngôi Sao Xanh, 122 Huỳnh Ngọc Huệ, P. An Khê, Đà Nẵng.</p>
     </footer>
 
     <script src="script.js"></script>
@@ -139,27 +129,82 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
 
-      // --- Tải bài viết ---
+      // --- Tải bài viết với chức năng Phân trang ---
       const postsEl = document.getElementById('posts');
       const noPostsEl = document.getElementById('noPosts');
-      db.collection('posts').orderBy('createdAt','desc')
-        .onSnapshot(snap=>{
-          if(snap.empty){
-            noPostsEl.style.display='block'; postsEl.innerHTML='';
-            noPostsEl.textContent="Chưa có bài nào.";
+      const postsPerPage = 12;
+      let currentPage = 1;
+      let allPosts = [];
+
+      function renderPostsPage(page) {
+          postsEl.innerHTML = '';
+          const start = (page - 1) * postsPerPage;
+          const end = start + postsPerPage;
+          const paginatedPosts = allPosts.slice(start, end);
+
+          paginatedPosts.forEach(post => {
+              const d = post.data;
+              const art = document.createElement('article');
+              art.className = "post-title-item";
+              art.innerHTML = `
+                <span class="post-date">👉 Nhấn vào để xem</span>
+                <a href="post.html?slug=${d.slug}">${d.title || ''}</a>
+              `;
+              postsEl.appendChild(art);
+          });
+          renderPaginationControls();
+      }
+
+      function renderPaginationControls() {
+          const pageCount = Math.ceil(allPosts.length / postsPerPage);
+          const oldControls = document.getElementById('pagination-controls');
+          if (oldControls) oldControls.remove();
+          if (pageCount <= 1) return;
+
+          const controlsContainer = document.createElement('div');
+          controlsContainer.id = 'pagination-controls';
+          controlsContainer.style.cssText = "text-align: center; margin-top: 25px; margin-bottom: 10px;";
+
+          if (currentPage > 1) {
+              const prevButton = document.createElement('button');
+              prevButton.textContent = 'Trang trước';
+              prevButton.onclick = () => { currentPage--; renderPostsPage(currentPage); };
+              prevButton.style.cssText = "margin: 0 5px; padding: 8px 12px; cursor: pointer; border: 1px solid #ccc; background: #f0f0f0; border-radius: 4px;";
+              controlsContainer.appendChild(prevButton);
+          }
+
+          const pageIndicator = document.createElement('span');
+          pageIndicator.textContent = `Trang ${currentPage} / ${pageCount}`;
+          pageIndicator.style.margin = '0 10px';
+          controlsContainer.appendChild(pageIndicator);
+
+          if (currentPage < pageCount) {
+              const nextButton = document.createElement('button');
+              nextButton.textContent = 'Trang sau';
+              nextButton.onclick = () => { currentPage++; renderPostsPage(currentPage); };
+              nextButton.style.cssText = "margin: 0 5px; padding: 8px 12px; cursor: pointer; border: 1px solid #ccc; background: #f0f0f0; border-radius: 4px;";
+              controlsContainer.appendChild(nextButton);
+          }
+          postsEl.parentNode.insertBefore(controlsContainer, postsEl.nextSibling);
+      }
+
+      db.collection('posts').orderBy('createdAt', 'desc')
+        .onSnapshot(snap => {
+          if (snap.empty) {
+            noPostsEl.style.display = 'block';
+            postsEl.innerHTML = '';
+            allPosts = [];
+            noPostsEl.textContent = "Chưa có bài viết nào.";
+            renderPaginationControls();
             return;
           }
-          noPostsEl.style.display='none'; postsEl.innerHTML='';
-          snap.forEach(doc=>{
-            const d=doc.data();
-            const art=document.createElement('article');
-            art.className="post-title-item";
-            art.innerHTML=`
-              <span class="post-date">👉 Bài viết nhấn vào để xem</span>
-              <a href="post.html?slug=${d.slug}">${d.title||''}</a>
-            `;
-            postsEl.appendChild(art);
-          });
+          noPostsEl.style.display = 'none';
+          allPosts = snap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+          const pageCount = Math.ceil(allPosts.length / postsPerPage);
+          if (currentPage > pageCount) currentPage = pageCount || 1;
+          
+          renderPostsPage(currentPage);
         });
 
       // --- Tải nội dung động cho sidebar và thực đơn ---
@@ -167,6 +212,7 @@
       const thongBaoPhuHuynhEl = document.getElementById('thongBaoPhuHuynhContent');
       const thongBaoChungEl = document.getElementById('thongBaoChungContent');
       const thucDonLinkEl = document.getElementById('thucDonLink');
+      const welcomeMessageEl = document.getElementById('welcomeMessage');
 
       db.collection('site_content').doc('dynamic_content')
         .onSnapshot(doc => {
@@ -177,6 +223,11 @@
             thongBaoChungEl.textContent = data.thongBaoChung || 'Chưa có thông báo.';
             thucDonLinkEl.textContent = data.thucDonText || 'Xem thực đơn';
             thucDonLinkEl.href = data.thucDonLink || '#';
+            if (data.welcomeMessage) {
+              welcomeMessageEl.innerHTML = data.welcomeMessage.replace(/\n/g, '<br>');
+            } else {
+              welcomeMessageEl.innerHTML = 'Chào Mừng Quý Phụ Huynh Thăm Quan Website<br>Chúc những gì tốt đẹp nhất đến với gia đình';
+            }
           } else {
             console.log("Không tìm thấy tài liệu cấu hình!");
           }
