@@ -110,6 +110,8 @@
             <button type="button" onclick="applyImageSize(50)">50%</button>
             <button type="button" onclick="applyImageSize(75)">75%</button>
             <button type="button" onclick="applyImageSize(100)">100%</button>
+            <input type="number" id="customImageSize" placeholder="%" min="1" max="200" style="width: 60px; margin-left: 10px;">
+            <button type="button" onclick="applyCustomImageSize()" title="Áp dụng kích thước tùy chỉnh">Áp dụng</button>
         </div>
 
         <button class="btn btn-primary" type="submit" id="submitBtn">Đăng bài</button>
@@ -209,6 +211,7 @@
         loginBox.classList.add('hidden');
         postBox.classList.remove('hidden');
         msg.style.display = 'none';
+        showStatus(`Chào mừng ${user.email}!`, 'success');
         initializePostsListener();
       } else {
         loginBox.classList.remove('hidden');
@@ -219,6 +222,7 @@
           postsListener = null;
         }
         myPostsEl.innerHTML = '<div class="loading">Vui lòng đăng nhập để xem bài viết.</div>';
+        showStatus('', 'info'); // Clear status
       }
     });
 
@@ -286,13 +290,35 @@
     document.getElementById('colorPicker').addEventListener('input', e => format('foreColor', e.target.value));
     function insertImageURL() {
       const url = prompt("Nhập URL hình ảnh:");
-      if (url) format('insertImage', url);
+      if (url) {
+        format('insertImage', url);
+        // Tự động áp dụng kích thước 50% cho ảnh vừa chèn từ URL
+        setTimeout(() => {
+          const images = editor.querySelectorAll('img');
+          const lastImage = images[images.length - 1];
+          if (lastImage) {
+            lastImage.style.width = '50%';
+            lastImage.style.height = 'auto';
+          }
+        }, 100);
+      }
     }
     document.getElementById('imageUpload').addEventListener('change', e => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = () => format('insertImage', reader.result);
+        reader.onload = () => {
+          format('insertImage', reader.result);
+          // Tự động áp dụng kích thước 50% cho ảnh vừa chèn
+          setTimeout(() => {
+            const images = editor.querySelectorAll('img');
+            const lastImage = images[images.length - 1];
+            if (lastImage) {
+              lastImage.style.width = '50%';
+              lastImage.style.height = 'auto';
+            }
+          }, 100);
+        };
         reader.readAsDataURL(file);
       }
     });
@@ -313,6 +339,18 @@
       if (selectedImage) {
         selectedImage.style.width = widthPercentage + '%';
         selectedImage.style.height = 'auto';
+      }
+    }
+
+    // Hàm áp dụng kích thước ảnh tùy chỉnh
+    function applyCustomImageSize() {
+      const customSize = document.getElementById('customImageSize').value;
+      if (selectedImage && customSize && customSize > 0 && customSize <= 200) {
+        selectedImage.style.width = customSize + '%';
+        selectedImage.style.height = 'auto';
+        showStatus(`✅ Đã áp dụng kích thước ${customSize}%`, 'success', 2000);
+      } else if (!customSize || customSize <= 0 || customSize > 200) {
+        showStatus('❌ Vui lòng nhập kích thước từ 1% đến 200%', 'error', 3000);
       }
     }
 

@@ -1,0 +1,20 @@
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet(); // Hoặc bạn có thể chọn sheet cụ thể bằng cách dùng ss.getSheetByName("TênSheet")
+
+  var timestamp = new Date();
+  var data = [
+    e.parameter.parentName,
+    e.parameter.email || '', // Xử lý trường email có thể trống
+    e.parameter.studentName || '', // Xử lý trường studentName có thể trống
+    e.parameter.grade || '', // Xử lý trường grade có thể trống
+    e.parameter.feedback,
+    timestamp
+  ];
+
+  sheet.appendRow(data);
+
+  // Phản hồi (tùy chọn)
+  return ContentService.createTextOutput(JSON.stringify({"result":"success", "message":"Dữ liệu đã được ghi nhận."}))
+      .setMimeType(ContentService.MimeType.JSON);
+}
